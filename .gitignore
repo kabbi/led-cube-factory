@@ -1,0 +1,15 @@
+.venv/
+build/
+__pycache__/
+*.kicad_prl
+*-backups/
+fp-info-cache
+*.lck
+~*
+.DS_Store
+.pytest_cache/
+# KiCad 10 local history (a nested git repo of snapshots)
+.history/
+# router run logs (absolute local paths)
+logs/
+*.log

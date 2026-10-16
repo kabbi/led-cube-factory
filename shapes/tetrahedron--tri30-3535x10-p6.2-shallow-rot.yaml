@@ -1,0 +1,3 @@
+# Four triangles: the smallest closed shape, 40 LEDs.
+solid: tetrahedron
+boards: {tri: tri30-3535x10-p6.2-shallow-rot}

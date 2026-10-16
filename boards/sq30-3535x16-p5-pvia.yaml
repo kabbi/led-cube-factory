@@ -1,0 +1,12 @@
+# 4x4 WS2812B-Mini (3535) tile at 5mm pitch -- same LED and pitch as the
+# triangle tri30-3535x10-p5-shallow-pvia.
+shape: square
+edge: 30.0
+leds:
+  part: ws2812b-mini-3535
+  cols: 4
+  rows: 4
+  pitch: 5.0
+# generated back: the square30 templates' vias sit where a 5mm grid puts LED pads
+router:
+  power_vias: pattern

@@ -1,0 +1,3 @@
+# Eight triangles, 80 LEDs.
+solid: octahedron
+boards: {tri: tri30-3535x10-p6.2-shallow-rot}

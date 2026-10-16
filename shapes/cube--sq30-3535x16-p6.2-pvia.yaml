@@ -1,0 +1,3 @@
+# The 3535 cube, 96 LEDs at the same 6.2mm pitch as the triangles.
+solid: cube
+boards: {square: sq30-3535x16-p6.2-pvia}

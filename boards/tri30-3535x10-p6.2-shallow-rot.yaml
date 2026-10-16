@@ -1,0 +1,16 @@
+# Triangle tile, 4+3+2+1 WS2812B-Mini (3535) at 6.2mm pitch: outer-ring LEDs
+# turned to keep their bodies off the edge (one rotation tops out at ~5.8mm).
+shape: tri
+edge: 30.0
+connector: edge_connector_shallow
+leds:
+  part: ws2812b-mini-3535
+  rows: 4
+  pitch: 6.2
+  rotation: edge
+caps: {along: [8.0], inset: 3.0}
+hubs:
+  radius: 5.5
+  jumper_radius: 3.0
+  label_offset: [0, 0.3]
+# patterned vias need one LED rotation; nearest-spot vias instead

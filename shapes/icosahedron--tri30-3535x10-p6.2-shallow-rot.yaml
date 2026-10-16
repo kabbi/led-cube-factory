@@ -1,0 +1,3 @@
+# Twenty triangles, 200 LEDs: the roundest all-triangle shape.
+solid: icosahedron
+boards: {tri: tri30-3535x10-p6.2-shallow-rot}

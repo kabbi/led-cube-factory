@@ -1,0 +1,11 @@
+# 8x8 WS2812B-2020 tile -- same form factor as thecube/denser_v4, with the
+# 2020 pinout fixed.
+shape: square
+edge: 30.0
+leds:
+  part: ws2812b-2020
+  cols: 8
+  rows: 8
+  pitch: 3.4
+# hand-drawn back side from denser_v4: vias sit in the gaps of a 3.4mm LED grid
+template: square30-dense

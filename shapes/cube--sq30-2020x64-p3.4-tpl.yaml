@@ -1,0 +1,3 @@
+# The dense cube: six 8x8 2020 tiles on the hand-drawn dense back, 384 LEDs.
+solid: cube
+boards: {square: sq30-2020x64-p3.4-tpl}

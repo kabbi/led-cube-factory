@@ -1,0 +1,81 @@
+# Shared part catalog. Every generated board pulls parts from here, so a fix
+# (footprint, pinout, LCSC code) lands in all variants on the next build.
+#
+# Footprints live in lib/tbc.pretty (vendored copies, so boards don't change
+# when KiCad's stock library does).
+#
+# `pins` maps a logical role to the footprint pad number. This is the single
+# source of truth for pinouts -- tests/test_parts.py cross-checks LED pin maps
+# against KiCad's stock symbols (denser_v4 shipped a 2020 board with the 5050
+# pinout; this check exists to make that impossible).
+
+leds:
+  ws2812b-5050:
+    # pads pulled in to +-1.7mm (stock is +-2.45) so edge LEDs clear the
+    # edge connector; this is the footprint led_board_v5 was assembled with
+    footprint: LED_WS2812B_PLCC4_5.0x5.0mm_InnerPads
+    body: 5.0                      # square package size, mm
+    value: WS2812B
+    kicad_symbol: WS2812B          # stock LED.kicad_sym entry used by the test
+    lcsc: C52917433
+    jlc_rotation: 0                # added to CPL rotation, verify in JLC preview
+    pins: {VDD: "1", DOUT: "2", GND: "3", DIN: "4"}
+
+  ws2812b-2020:
+    footprint: LED_WS2812B-2020_PLCC4_2.0x2.0mm
+    body: 2.0                      # square package size, mm
+    value: WS2812B-2020
+    kicad_symbol: WS2812B-2020
+    lcsc: C52917434
+    jlc_rotation: 0
+    pins: {DOUT: "1", GND: "2", DIN: "3", VDD: "4"}
+
+  ws2812b-mini-3535:
+    # pads pulled in to +-0.95mm (stock +-1.64), like the 5050 InnerPads
+    footprint: LED_WS2812B-Mini_PLCC4_3.5x3.5mm_InnerPads
+    body: 3.5                      # square package size, mm
+    value: WS2812B-Mini
+    # KiCad has no WS2812B-Mini symbol; the Worldsemi datasheet gives it the
+    # 5050 WS2812B pinout, so the test checks against that symbol
+    kicad_symbol: WS2812B
+    # lcsc: TODO -- pick the JLC part before the first order
+    jlc_rotation: 0
+    pins: {VDD: "1", DOUT: "2", GND: "3", DIN: "4"}
+
+capacitors:
+  c100n-0805:
+    footprint: C_0805_2012Metric
+    value: 100nF
+    lcsc: C49678
+    pins: {VDD: "1", GND: "2"}
+  c100n-0603:
+    footprint: C_0603_1608Metric
+    value: 100nF
+    lcsc: C14663
+    pins: {VDD: "1", GND: "2"}
+
+jumper:
+  footprint: SolderJumper-2_P1.3mm_Open_TrianglePad1.0x1.5mm
+  value: SolderJumper
+  pins: {PORT: "1", HUB: "2"}      # pad 1 always faces the edge port
+  # silkscreen label in the middle of each hub (KiBuzzard art, vendored from
+  # the square30 template)
+  labels: {IN: label_in, OUT: label_out, PASS: label_pass}
+
+# Tile-to-tile edge connector. Identical on every board -- this is the
+# mechanical/electrical contract between tiles. Pinout is a palindrome so a
+# neighbour mates in either orientation.
+edge_connector:
+  footprint: edge_conn
+  value: EdgeConn
+  pins: {"1": GND, "2": VDD, "3": PORT, "4": VDD, "5": GND}
+  span: 22.54                      # outermost pad extent along the edge, mm
+
+# Same pads, pinout and positions (mates with edge_connector), but 0.95mm deep
+# instead of 1.385: each pad has two 0.3mm holes instead of one 0.8mm, still
+# inside the edge (no castellation). For boards where LEDs crowd the edge.
+edge_connector_shallow:
+  footprint: edge_conn_shallow
+  value: EdgeConn
+  pins: {"1": GND, "2": VDD, "3": PORT, "4": VDD, "5": GND}
+  span: 22.54

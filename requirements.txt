@@ -1,0 +1,6 @@
+# Installed into a venv built on KiCad's bundled Python (see Makefile `setup`),
+# so `import pcbnew` works.
+kikit==1.8.1
+PyYAML>=6
+pytest>=8
+trimesh==4.5.3        # 3D demo assemblies (tbcgen shapes)

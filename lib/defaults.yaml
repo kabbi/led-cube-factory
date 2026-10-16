@@ -1,0 +1,71 @@
+# Defaults for every board. A board file (boards/*.yaml) overrides any key.
+
+rev: A
+
+shape: square            # square | hex | tri
+edge: 30.0               # edge length of the (regular) outline, mm
+
+leds:
+  part: ws2812b-5050
+  # square: {cols, rows, pitch}; hex: {rings, pitch}; tri: {rows, pitch}
+  # rotation: auto = every LED the same way, DOUT facing right (one pick-and-
+  # place orientation); edge = auto, but outer-ring LEDs turned in 15 deg
+  # steps so their body clears the edge (small non-square boards);
+  # flow = flip alternate rows to follow a serpentine
+  # chain; or a number of degrees applied to every LED.
+  rotation: auto
+  # chain: raster = every row left to right (pairs with a fixed rotation);
+  # serpentine = alternate rows reversed (pairs with rotation: flow)
+  chain: raster
+
+connector: edge_connector  # generated boards only; edge_connector_shallow
+                           # (lib/parts.yaml) for boards with LEDs near the edge
+
+caps:                    # generated boards only; templates keep their own caps
+  part: c100n-0805
+  along: [-7.5, 7.5]     # positions along each edge, relative to its middle
+  inset: 3.0             # distance from the board edge to the cap centre
+
+hubs:
+  # Back-side jumper clusters. Each has one jumper per port, placed in the
+  # direction of that port. Offsets are from the board centre, top view.
+  # Omit `at` to auto-place the three hubs on a circle of radius `radius`.
+  # angle: 0             # turn the auto layout clockwise, degrees
+  # label_offset: [0, 0]  # label position relative to its hub centre
+  radius: 7.0             # IN and OUT inner jumpers ~3.2mm apart on a 30mm square
+  jumper_radius: 3.225
+  IN:   {}
+  OUT:  {}
+  PASS: {}
+
+nets:
+  VDD: "+5V"
+  GND: "GND"
+
+stackup:
+  # Copper roles. Planes are filled zones; signal layers are routable.
+  # In2 carries +5V as a pour but may also take a few signal tracks.
+  F.Cu: signal
+  In1.Cu: {plane: GND}
+  In2.Cu: {plane: VDD, signal_cost: 4.0}
+  B.Cu: signal
+
+rules:                   # JLCPCB 4-layer standard capabilities, with margin
+  track_width: 0.2
+  clearance: 0.15
+  via_diameter: 0.5
+  via_drill: 0.3
+  hole_clearance: 0.25   # hole to hole
+  edge_clearance: 0.3    # tracks, vias, zones to board edge
+  pad_edge_clearance: 0.05  # castellated edge pads sit right at the edge
+  zone_clearance: 0.2
+
+router:
+  engine: internal       # internal | freerouting (Specctra round trip)
+  # LED power vias: nearest = closest free spot per pad; pattern = one
+  # LED-relative spot repeated on every LED, keeping data corridors free
+  power_vias: nearest
+  freerouting_passes: 30
+  grid: 0.05             # mm
+  via_cost: 1.2          # mm-equivalent penalty per via
+  turn_cost: 0.15        # mm-equivalent penalty per 45 degree turn

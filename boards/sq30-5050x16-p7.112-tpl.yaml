@@ -1,0 +1,10 @@
+# 4x4 WS2812B 5050 tile -- same form factor as thecube/led_board_v5.
+shape: square
+edge: 30.0
+leds:
+  part: ws2812b-5050
+  cols: 4
+  rows: 4
+  pitch: 7.112
+# hand-drawn back side (outline, connectors, caps, jumpers, back routing)
+template: square30

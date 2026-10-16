@@ -1,0 +1,3 @@
+# Two triangles and three squares, 68 LEDs.
+solid: triangular-prism
+boards: {square: sq30-3535x16-p6.2-pvia, tri: tri30-3535x10-p6.2-shallow-rot}

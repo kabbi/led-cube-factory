@@ -1,0 +1,3 @@
+# Eight triangles and six squares, 176 LEDs.
+solid: cuboctahedron
+boards: {square: sq30-3535x16-p6.2-pvia, tri: tri30-3535x10-p6.2-shallow-rot}

@@ -1,0 +1,20 @@
+# Triangle tile, 4+3+2+1 WS2812B-Mini (3535) at 5mm pitch -- same LED and
+# pitch as sq30-3535x16-p5-pvia, same 30mm edge so it mates with the square tiles.
+shape: tri
+edge: 30.0
+# LEDs come within ~1mm of the edge: shallow pads (same positions and pinout)
+connector: edge_connector_shallow
+leds:
+  part: ws2812b-mini-3535
+  rows: 4
+  pitch: 5.0
+# one cap per edge: with two, neighbouring edges' caps meet in the corners
+caps: {along: [8.0], inset: 3.0}
+# three-wing hubs in the corners; inner wings meet near the centre, so
+# radius - jumper_radius >= 2.4 keeps their courtyards apart
+hubs:
+  radius: 5.5
+  jumper_radius: 3.0
+  label_offset: [0, 0.3]   # into the open side of the Y, off the upper wings
+router:
+  power_vias: pattern

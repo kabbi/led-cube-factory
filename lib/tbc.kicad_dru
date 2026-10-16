@@ -1,0 +1,9 @@
+(version 1)
+
+# Shared custom DRC rules, copied into every generated board.
+
+# Pours, tracks and vias stay well off the routed board edge. Edge connector
+# pads are exempt (they sit at the edge by design), see pad_edge_clearance.
+(rule "copper to edge"
+  (condition "A.Type == 'Zone' || A.Type == 'Track' || A.Type == 'Via'")
+  (constraint edge_clearance (min ${EDGE_CLEARANCE})))

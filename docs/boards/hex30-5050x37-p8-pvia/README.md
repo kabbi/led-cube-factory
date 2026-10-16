@@ -35,10 +35,10 @@ Hexagon tile, 4 rings (37) of WS2812B 5050 at 8mm pitch: the most 5050s a 30mm h
 | | |
 |---|---|
 | DRC | 0 errors, 0 warnings, 0 unconnected |
-| Front track | 608 mm |
-| Back track | 343 mm |
+| Front track | 619 mm |
+| Back track | 332 mm |
 | In2 hops | 0 mm |
-| Vias | 107 |
+| Vias | 102 |
 
 ## Renders
 

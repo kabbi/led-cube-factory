@@ -35,10 +35,10 @@ Hexagon tile, 8 rings (169) of WS2812B-2020 at 3.7mm pitch: the LED density of t
 | | |
 |---|---|
 | DRC | 0 errors, 0 warnings, 0 unconnected |
-| Front track | 1218 mm |
-| Back track | 414 mm |
-| In2 hops | 18.1 mm |
-| Vias | 366 |
+| Front track | 1223 mm |
+| Back track | 409 mm |
+| In2 hops | 13.7 mm |
+| Vias | 369 |
 
 ## Renders
 

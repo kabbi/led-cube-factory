@@ -51,16 +51,6 @@
 	(duplicate_pad_numbers_are_jumpers no)
 	(fp_line
 		(start -15 0)
-		(end -15 3)
-		(stroke
-			(width 0.12)
-			(type solid)
-		)
-		(layer "F.SilkS")
-		(uuid "b77db3b1-377e-4a17-b5a6-a07c25f3c7cb")
-	)
-	(fp_line
-		(start -15 0)
 		(end 15 0)
 		(stroke
 			(width 0.12)
@@ -68,16 +58,6 @@
 		)
 		(layer "F.SilkS")
 		(uuid "df588bbf-1c95-4f09-9e9f-28e0da8a80b7")
-	)
-	(fp_line
-		(start 15 0)
-		(end 15 3)
-		(stroke
-			(width 0.12)
-			(type solid)
-		)
-		(layer "F.SilkS")
-		(uuid "a1c9858d-4268-4a72-8355-c142dcd34fd4")
 	)
 	(fp_text user "-"
 		(at -9.25 2.5 0)

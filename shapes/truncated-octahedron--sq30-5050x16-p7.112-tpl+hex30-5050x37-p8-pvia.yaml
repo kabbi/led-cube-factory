@@ -1,0 +1,3 @@
+# Six squares and eight hexagons of 5050s, 392 LEDs.
+solid: truncated-octahedron
+boards: {square: sq30-5050x16-p7.112-tpl, hex: hex30-5050x37-p8-pvia}

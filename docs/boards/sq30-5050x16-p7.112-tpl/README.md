@@ -91,6 +91,10 @@ LED index in the data chain -> position, mm from the board centre (y down, top v
 
 </details>
 
+## Used in
+
+- [truncated-octahedron--sq30-5050x16-p7.112-tpl+hex30-5050x37-p8-pvia](../../shapes/truncated-octahedron--sq30-5050x16-p7.112-tpl+hex30-5050x37-p8-pvia/README.md)
+
 ## Files
 
 - config: [boards/sq30-5050x16-p7.112-tpl.yaml](../../../boards/sq30-5050x16-p7.112-tpl.yaml)

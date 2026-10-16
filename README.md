@@ -10,6 +10,7 @@ hand-drawn back side -- is shared.
 <a href="docs/shapes/cube--sq30-3535x16-p6.2-pvia/README.md"><img src="docs/shapes/cube--sq30-3535x16-p6.2-pvia/render.png" width="200" alt="cube of 3535 tiles"></a>
 <a href="docs/shapes/cuboctahedron--sq30-3535x16-p6.2-pvia+tri30-3535x10-p6.2-shallow-rot/README.md"><img src="docs/shapes/cuboctahedron--sq30-3535x16-p6.2-pvia+tri30-3535x10-p6.2-shallow-rot/render.png" width="200" alt="cuboctahedron of square and triangle tiles"></a>
 <a href="docs/shapes/icosahedron--tri30-3535x10-p6.2-shallow-rot/README.md"><img src="docs/shapes/icosahedron--tri30-3535x10-p6.2-shallow-rot/render.png" width="200" alt="icosahedron of triangle tiles"></a>
+<a href="docs/shapes/truncated-octahedron--sq30-2020x64-p3.4-tpl+hex30-2020x169-p3.7-pvia/README.md"><img src="docs/shapes/truncated-octahedron--sq30-2020x64-p3.4-tpl+hex30-2020x169-p3.7-pvia/render.png" width="200" alt="truncated octahedron of 2020 square and hexagon tiles"></a>
 <a href="docs/shapes/cube--sq30-2020x64-p3.4-tpl/README.md"><img src="docs/shapes/cube--sq30-2020x64-p3.4-tpl/render.png" width="200" alt="dense cube of 2020 tiles"></a>
 </p>
 
@@ -190,6 +191,42 @@ Experiments, 2026-10-16 (2020, 2.95 mm unless noted, 0.127/0.1 rules):
 | tri 7 rows, 3.4 mm | 0.127/0.1, hole-copper 0.2 | **DRC clean**, 54/56 patterned: `tri30-2020x28-p3.4-shallow-pvia` |
 | sq 7x7, 3.4 mm | default rules | row return fails |
 
+### Hexagons
+
+Same 30 mm edge, so a hexagon mates with every other tile (truncated
+octahedron: squares + hexagons; truncated tetrahedron: triangles +
+hexagons). LEDs sit on a hex lattice in `rings` (1, 7, 19, 37, ... 3n(n-1)+1),
+rows parallel to the top and bottom edges. All six sides of the lattice face
+an edge, so towards the four slanted edges a square package reaches 1.37 x
+half its size (the 2020's pads: 1.55 mm). The pitch for a ring count is the
+widest that keeps that clear of the connector pads:
+
+| board | LEDs | pitch | to the pads | why |
+|---|---|---|---|---|
+| `hex30-5050x37-p8-pvia` | 4 rings, 37 | 8.0 mm (max ~8.05) | 0.4 mm | 5 rings need ~6 mm: bodies 0.2 mm apart |
+| `hex30-2020x169-p3.7-pvia` | 8 rings, 169 | 3.7 mm (max ~3.77) | 0.6 mm | same LED density as the 8x8 at 3.4 mm |
+
+The back is the hard part. Each of the six ports has a jumper on all three
+hubs, so port nets and hubs form a K3,6, which needs at least six crossings:
+In2 hops, each needing two via spots free on every layer. The 5050 board
+and the 2020 at 3.7 mm have them; a 2020 field at 3.3-3.4 mm doesn't.
+Hubs: `jumper_radius: 4.3` for six jumpers, `radius: 8` keeps the three
+rings apart.
+
+Experiments, 2026-10-16 (generated back, patterned vias):
+
+| board | change | result |
+|---|---|---|
+| 5050, 4 rings, 8.0 mm | default rules and hubs | **DRC clean**, 62/74 vias patterned, ~135 s |
+| 2020, 9 rings (217), 3.3 mm, shallow | 0.127/0.1, hole-copper 0.2 | P2 boxed in on the back |
+| 2020, 9 rings, 3.3 mm, shallow | same, hubs angle 240 (IN by D1, OUT by the last LED) | P2 boxed in |
+| 2020, 8 rings (169), 3.4 mm | default rules, hubs angle 0 / 240 | P2 / P3 boxed in |
+| 2020, 8 rings, 3.7 mm | default rules or 0.127/0.1, hubs angle 0 or 240 | all four route (~400 s run 4 at once); default rules + hubs: **DRC clean**, 329/338 patterned, ~180 s alone |
+
+The generated hex board is 3.5x the square's area, so the router's grid
+is too: `Grid._window` now prepares its shapes before testing grid points
+(~40x faster on board-sized polygons like the data corridors; same result).
+
 ## Panels
 
 `panels/<name>.yaml` puts built boards on one panel (`make panel`, output in
@@ -303,8 +340,10 @@ boards: {square: sq30-2020x64-p3.4-tpl}
 ```
 
 Solids: tetrahedron, cube, octahedron, icosahedron, square-pyramid,
-triangular-prism, cuboctahedron (`tbcgen/models.py: SHAPES`; any solid whose
-faces are equilateral triangles and squares can be added as a vertex list).
+triangular-prism, cuboctahedron, hexagonal-prism, truncated-tetrahedron,
+truncated-octahedron (`tbcgen/models.py: SHAPES`; any solid whose faces are
+regular triangles, squares and hexagons can be added as a vertex list).
+A shape names its boards `<square>+<tri>+<hex>`, only those the solid uses.
 Each tile sits with its board bottom on the face and LEDs out, so neighbours
 meet along their inner edges, as on a real build. A board's GLB is merged
 per material and instanced on every face, so a solid's file is about the

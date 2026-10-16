@@ -1,0 +1,15 @@
+# Hexagon tile, 8 rings (169) of WS2812B-2020 at 3.7mm pitch: the LED density
+# of the 8x8 sq30-2020x64-p3.4-tpl (0.072/mm2), and 3.7mm is about the widest
+# 8 rings go (0.6mm from the pads to the connector pads; 3.75 leaves 0.3).
+# 9 rings (217) would need 3.3mm and doesn't route: six ports to three hubs
+# take In2 crossings, and a 3.3-3.4mm field has no room for their vias.
+shape: hex
+edge: 30.0
+leds:
+  part: ws2812b-2020
+  rings: 8
+  pitch: 3.7
+# six ports: 4.3mm jumper rings, hubs 8mm out so the rings stay apart
+hubs: {radius: 8.0, jumper_radius: 4.3}
+router:
+  power_vias: pattern

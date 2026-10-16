@@ -7,7 +7,9 @@ from tbcgen import models
 
 FACES = {"tetrahedron": [3] * 4, "cube": [4] * 6, "octahedron": [3] * 8,
          "icosahedron": [3] * 20, "square-pyramid": [3] * 4 + [4],
-         "triangular-prism": [3] * 2 + [4] * 3, "cuboctahedron": [3] * 8 + [4] * 6}
+         "triangular-prism": [3] * 2 + [4] * 3, "cuboctahedron": [3] * 8 + [4] * 6,
+         "hexagonal-prism": [4] * 6 + [6] * 2, "truncated-tetrahedron": [3] * 4 + [6] * 4,
+         "truncated-octahedron": [4] * 6 + [6] * 8}
 
 
 @pytest.mark.parametrize("name", models.SHAPES)
@@ -20,9 +22,11 @@ def test_polyhedra_have_regular_unit_faces(name):
         assert (v[loop].mean(axis=0)) @ n > 0               # normal points out
 
 
-@pytest.mark.parametrize("shape,k", [("tri", 3), ("square", 4)])
-def test_tile_fits_face_led_side_out(shape, k):
-    v, faces = models.polyhedron("square-pyramid")
+@pytest.mark.parametrize("solid,shape,k", [("square-pyramid", "tri", 3),
+                                           ("square-pyramid", "square", 4),
+                                           ("hexagonal-prism", "hex", 6)])
+def test_tile_fits_face_led_side_out(solid, shape, k):
+    v, faces = models.polyhedron(solid)
     loop, n = next(f for f in faces if len(f[0]) == k)
     T = models.fit(models.tile_outline(shape, 1.0), v[loop], n)
     assert np.allclose(T[:3, :3] @ T[:3, :3].T, np.eye(3))  # rigid
@@ -33,10 +37,9 @@ def test_tile_fits_face_led_side_out(shape, k):
 def test_shape_configs_match_their_solid(name):
     from tbcgen import config
     s = config.load_shape(name)                              # name check happens here
-    kinds = {3: "tri", 4: "square"}
-    need = {kinds[len(loop)] for loop, _ in models.polyhedron(s["solid"])[1]}
+    need = {models.KINDS[len(loop)] for loop, _ in models.polyhedron(s["solid"])[1]}
     assert set(s["boards"]) == need, f"{s['solid']} needs boards for {sorted(need)}"
     for kind, board in s["boards"].items():
         cfg = config.load_board(board)
-        assert {"tri": "tri", "square": "square"}[kind] == cfg["shape"]
+        assert kind == cfg["shape"]
         assert cfg["edge"] == 30.0

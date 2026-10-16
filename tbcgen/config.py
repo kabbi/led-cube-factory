@@ -84,13 +84,13 @@ def all_boards():
 
 
 def shape_name(cfg):
-    """<solid>--<square board>+<tri board> (only the boards the solid uses)."""
-    return f"{cfg['solid']}--" + "+".join(cfg["boards"][k] for k in ("square", "tri")
+    """<solid>--<square board>+<tri board>+<hex board> (only the boards the solid uses)."""
+    return f"{cfg['solid']}--" + "+".join(cfg["boards"][k] for k in ("square", "tri", "hex")
                                           if k in cfg["boards"])
 
 
 def load_shape(path):
-    """A demo assembly: shapes/<name>.yaml = {solid, boards: {square, tri}}.
+    """A demo assembly: shapes/<name>.yaml = {solid, boards: {square, tri, hex}}.
     The header comment block is its description."""
     path = Path(path)
     if not path.exists():

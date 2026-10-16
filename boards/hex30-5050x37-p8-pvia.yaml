@@ -1,0 +1,14 @@
+# Hexagon tile, 4 rings (37) of WS2812B 5050 at 8mm pitch: the most 5050s a
+# 30mm hexagon takes (5 rings would need ~6mm, bodies 0.2mm apart). 8mm is
+# the widest 4 rings go: the corner LEDs' bodies (1.37 x half a body towards
+# a slanted edge) keep 0.4mm to the connector pads. Mates with every 30mm tile.
+shape: hex
+edge: 30.0
+leds:
+  part: ws2812b-5050
+  rings: 4
+  pitch: 8.0
+# six ports: 4.3mm jumper rings, hubs 8mm out so the rings stay apart
+hubs: {radius: 8.0, jumper_radius: 4.3}
+router:
+  power_vias: pattern

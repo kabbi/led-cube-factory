@@ -77,7 +77,11 @@ SHAPES = {
     "square-pyramid": [(1, 0, 1), (1, 0, -1), (-1, 0, 1), (-1, 0, -1), (0, 2 ** 0.5, 0)],
     "triangular-prism": _prism(3),
     "cuboctahedron": _perms((1, 1, 0)),
+    "hexagonal-prism": _prism(6),
+    "truncated-tetrahedron": [v for v in _perms((3, 1, 1)) if v[0] * v[1] * v[2] > 0],
+    "truncated-octahedron": _perms((0, 1, 2)),
 }
+KINDS = {3: "tri", 4: "square", 6: "hex"}       # face size -> board shape
 
 
 def polyhedron(name):
@@ -163,23 +167,22 @@ def tile_parts(glb):
 
 
 def assemble(name, tiles):
-    """tiles: {"tri": (cfg, glb), "square": (cfg, glb)}. Returns a trimesh Scene."""
+    """tiles: {"tri" | "square" | "hex": (cfg, glb)}. Returns a trimesh Scene."""
     import trimesh
     v, faces = polyhedron(name)
     need = {len(loop) for loop, _ in faces}
-    kinds = {3: "tri", 4: "square"}
     for k in need:
-        if kinds[k] not in tiles:
-            raise ValueError(f"{name} needs a {kinds[k]} board")
+        if KINDS[k] not in tiles:
+            raise ValueError(f"{name} needs a {KINDS[k]} board")
     edge = {k: tiles[k][0]["edge"] / 1000 for k in tiles}
-    if len({edge[kinds[k]] for k in need}) > 1:
-        raise ValueError(f"{name}: tri and square boards have different edge lengths")
-    scale = edge[kinds[next(iter(need))]]
+    if len({edge[KINDS[k]] for k in need}) > 1:
+        raise ValueError(f"{name}: its boards have different edge lengths")
+    scale = edge[KINDS[next(iter(need))]]
     scene = trimesh.Scene()
-    parts = {k: tile_parts(tiles[k][1]) for k in {kinds[n] for n in need}}
+    parts = {k: tile_parts(tiles[k][1]) for k in {KINDS[n] for n in need}}
     for f, (loop, normal) in enumerate(faces):
-        kind = kinds[len(loop)]
-        T = fit(tile_outline(kind if kind == "tri" else "square", scale), v[loop] * scale, normal)
+        kind = KINDS[len(loop)]
+        T = fit(tile_outline(kind, scale), v[loop] * scale, normal)
         for key, mesh in parts[kind].items():
             geom = f"{kind}_{key}"
             if geom not in scene.geometry:

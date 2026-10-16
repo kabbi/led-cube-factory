@@ -77,6 +77,8 @@ class Grid:
         j0 = max(0, int((bx0 - self.x0) / self.res) - 1)
         j1 = min(self.nx, int((bx1 - self.x0) / self.res) + 2)
         sl = (slice(i0, i1), slice(j0, j1))
+        # prepared: ~40x faster on big polygons (corridors spanning a hex board)
+        shapely.prepare(geom)
         return sl, shapely.contains_xy(geom, self.X[sl], self.Y[sl])
 
     # -- occupancy -------------------------------------------------------------

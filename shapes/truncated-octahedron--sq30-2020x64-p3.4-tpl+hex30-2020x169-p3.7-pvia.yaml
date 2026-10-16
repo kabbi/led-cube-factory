@@ -1,0 +1,4 @@
+# Six 8x8 squares and eight 169-LED hexagons of 2020s at the same LED
+# density, 1736 LEDs.
+solid: truncated-octahedron
+boards: {square: sq30-2020x64-p3.4-tpl, hex: hex30-2020x169-p3.7-pvia}

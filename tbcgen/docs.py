@@ -220,7 +220,7 @@ def shape_page(name):
         _png(png, d / "render.png", 640)
 
     _, faces = models.polyhedron(scfg["solid"])
-    kinds = {3: "tri", 4: "square"}
+    kinds = models.KINDS
     count = {}
     for loop, _ in faces:
         count[kinds[len(loop)]] = count.get(kinds[len(loop)], 0) + 1

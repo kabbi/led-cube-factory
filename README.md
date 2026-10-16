@@ -4,6 +4,22 @@ Parametric generator for tileable LED PCB tiles (KiCad 10). One YAML file per
 board variant; everything else -- footprints, pinouts, design rules, the
 hand-drawn back side -- is shared.
 
+**[Browse every board and shape in the docs →](docs/README.md)**
+
+<p>
+<a href="docs/shapes/cube--sq30-3535x16-p6.2-pvia/README.md"><img src="docs/shapes/cube--sq30-3535x16-p6.2-pvia/render.png" width="200" alt="cube of 3535 tiles"></a>
+<a href="docs/shapes/cuboctahedron--sq30-3535x16-p6.2-pvia+tri30-3535x10-p6.2-shallow-rot/README.md"><img src="docs/shapes/cuboctahedron--sq30-3535x16-p6.2-pvia+tri30-3535x10-p6.2-shallow-rot/render.png" width="200" alt="cuboctahedron of square and triangle tiles"></a>
+<a href="docs/shapes/icosahedron--tri30-3535x10-p6.2-shallow-rot/README.md"><img src="docs/shapes/icosahedron--tri30-3535x10-p6.2-shallow-rot/render.png" width="200" alt="icosahedron of triangle tiles"></a>
+<a href="docs/shapes/cube--sq30-2020x64-p3.4-tpl/README.md"><img src="docs/shapes/cube--sq30-2020x64-p3.4-tpl/render.png" width="200" alt="dense cube of 2020 tiles"></a>
+</p>
+
+<p>
+<a href="docs/boards/tri30-3535x10-p6.2-shallow-rot/README.md"><img src="docs/boards/tri30-3535x10-p6.2-shallow-rot/model.png" width="200" alt="triangle tile, 3D"></a>
+<a href="docs/boards/tri30-3535x10-p6.2-shallow-rot/README.md"><img src="docs/boards/tri30-3535x10-p6.2-shallow-rot/back.svg" width="200" alt="triangle tile, back copper with jumper hubs"></a>
+<a href="docs/boards/sq30-2020x64-p3.4-tpl/README.md"><img src="docs/boards/sq30-2020x64-p3.4-tpl/model.png" width="200" alt="8x8 2020 tile, 3D"></a>
+<a href="docs/boards/sq30-2020x64-p3.4-tpl/README.md"><img src="docs/boards/sq30-2020x64-p3.4-tpl/front.svg" width="200" alt="8x8 2020 tile, front copper"></a>
+</p>
+
 ```
 make setup                                 # once: venv on KiCad's Python + KiKit
 make all                                   # build + DRC + render + fab every board, then tests

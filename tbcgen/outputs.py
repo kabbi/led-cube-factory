@@ -73,10 +73,13 @@ def write_project(cfg, out):
 
 # -- checks -------------------------------------------------------------------
 
-def drc(pcb, out):
+def drc(pcb, out, refill=True):
+    """refill: fill zones with the project's rules and save them -- the fill
+    pcbnew does while building doesn't see the custom edge clearance, and the
+    gerbers are plotted from the saved fill."""
     report = out / "drc.json"
     run([KICAD_CLI, "pcb", "drc", "--format", "json", "--severity-all",
-         "--refill-zones", "-o", report, pcb])
+         *(["--refill-zones", "--save-board"] if refill else []), "-o", report, pcb])
     d = json.loads(report.read_text())
     sev = collections.Counter()
     kinds = collections.Counter()
@@ -106,13 +109,22 @@ def render(pcb, out):
 
 def fab(cfg, pcb, out):
     """Gerbers via KiKit; BOM/CPL from kicad-cli positions + LCSC fields."""
-    import pcbnew  # noqa: imported late so non-KiCad commands still work
     fd = out / "fab"
     if fd.exists():
         shutil.rmtree(fd)
     fd.mkdir()
     run([KIKIT, "fab", "jlcpcb", "--no-drc", "--no-assembly", "--autoname", pcb, fd])
 
+    rot_fix = {p["value"]: p.get("jlc_rotation", 0) for p in [cfg["_led"], cfg["_cap"]]}
+    write_bom_cpl(pcb, fd, cfg["name"], rot_fix, centre=(100.0, 100.0))
+    return fd
+
+
+def write_bom_cpl(pcb, fd, name, rot_fix, centre=None):
+    """JLC BOM and CPL with LCSC codes. rot_fix: extra rotation per part value
+    (JLC's reel orientation). centre: board middle to re-centre on; None for
+    the aux origin (panels: the gerbers' origin)."""
+    import pcbnew  # noqa: imported late so non-KiCad commands still work
     board = pcbnew.LoadBoard(str(pcb))
     parts = {}
     for fp in board.GetFootprints():
@@ -125,18 +137,18 @@ def fab(cfg, pcb, out):
     for ref, key in parts.items():
         groups[key].append(ref)
     nat = lambda r: (r.rstrip("0123456789"), int(r[len(r.rstrip("0123456789")):] or 0))
-    with open(fd / f"{cfg['name']}-bom.csv", "w", newline="") as f:
+    with open(fd / f"{name}-bom.csv", "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["Comment", "Designator", "Footprint", "LCSC", "Quantity"])
         for (val, fpn, lcsc), refs in sorted(groups.items()):
             w.writerow([val, ",".join(sorted(refs, key=nat)), fpn, lcsc, len(refs)])
 
     pos = fd / "pos.csv"
+    origin = ["--use-drill-file-origin"] if centre is None else []
     run([KICAD_CLI, "pcb", "export", "pos", "--format", "csv", "--units", "mm",
-         "--side", "both", "--exclude-dnp", "-o", pos, pcb])
-    rot_fix = {p["value"]: p.get("jlc_rotation", 0) for p in [cfg["_led"], cfg["_cap"]]}
-    cx, cy = 100.0, 100.0
-    with open(pos) as f, open(fd / f"{cfg['name']}-cpl.csv", "w", newline="") as g:
+         "--side", "both", "--exclude-dnp", *origin, "-o", pos, pcb])
+    cx, cy = centre or (0.0, 0.0)
+    with open(pos) as f, open(fd / f"{name}-cpl.csv", "w", newline="") as g:
         w = csv.writer(g)
         w.writerow(["Designator", "Val", "Package", "Mid X", "Mid Y", "Rotation", "Layer"])
         for row in csv.DictReader(f):
@@ -148,18 +160,26 @@ def fab(cfg, pcb, out):
                         f"{float(row['PosX']) - cx:.4f}", f"{float(row['PosY']) + cy:.4f}",
                         f"{rot:.1f}", row["Side"]])
     pos.unlink()
-    return fd
 
 
-def panel(cfg, pcb, out, preset):
-    pd = out / "panel"
-    pd.mkdir(exist_ok=True)
-    pp = pd / f"{cfg['name']}-panel.kicad_pcb"
-    run([KIKIT, "panelize", "-p", preset, pcb, pp])
-    run([KICAD_CLI, "pcb", "render", "--side", "top", "-w", "1600", "-h", "1200",
+def panel(spec):
+    """build/panels/<name>/: the panel, its render, JLC gerbers, BOM and CPL,
+    and a DRC report (zones as the boards filled them; not refilled, since
+    the tabs join the outlines and a refill would pour into them)."""
+    from . import panel as pnl
+    pp, cfgs, size, ntabs = pnl.build(spec)
+    pd = pp.parent
+    run([KICAD_CLI, "pcb", "render", "--side", "top", "-w", "1600", "-h", "1600",
          "--quality", "basic", "-o", pd / "panel.png", pp])
-    run([KIKIT, "fab", "jlcpcb", "--no-drc", "--no-assembly", "--autoname", pp, pd / "fab"])
-    return pp
+    fd = pd / "fab"
+    if fd.exists():
+        shutil.rmtree(fd)
+    fd.mkdir()
+    run([KIKIT, "fab", "jlcpcb", "--no-drc", "--no-assembly", "--autoname", pp, fd])
+    rot_fix = {p["value"]: p.get("jlc_rotation", 0)
+               for cfg in cfgs.values() for p in [cfg["_led"], cfg["_cap"]]}
+    write_bom_cpl(pp, fd, spec["name"], rot_fix)
+    return pp, size, ntabs, drc(pp, pd, refill=False)
 
 
 def write_pixelmap(pixelmap, out):

@@ -5,13 +5,15 @@ PY := .venv/bin/python
 TBC := $(PY) -m tbcgen
 BOARDS ?=
 SHAPES ?=
+PANELS ?=
 
 .PHONY: setup build check render fab all panel release model shapes docs test clean
 
 all:    ; $(TBC) all $(BOARDS) && $(PY) -m pytest -q tests
 build check render fab:
 	$(TBC) $@ $(BOARDS)
-panel:  ; $(TBC) panel $(BOARDS) --preset $(or $(PRESET),jlc-2x2)
+# panels from panels/*.yaml (boards must be built); pick with PANELS="tri30-3535-15"
+panel:  ; $(TBC) panel $(PANELS)
 release:; $(TBC) release $(BOARDS)
 model:  ; $(TBC) model $(BOARDS)
 # demo polyhedra from shapes/*.yaml; pick with SHAPES="cube--sq30-2020x64-p3.4-tpl"

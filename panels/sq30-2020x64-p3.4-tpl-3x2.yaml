@@ -1,0 +1,8 @@
+# 3x2 of the dense 2020 square on 5mm rails top and bottom.
+preset: jlc-rails
+layout: grid
+board: sq30-2020x64-p3.4-tpl
+rows: 2
+cols: 3
+space: 2.0
+max_size: [100, 100]

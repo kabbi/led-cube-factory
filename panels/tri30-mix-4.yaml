@@ -1,0 +1,7 @@
+# One of each triangle variant, nested in a row.
+preset: jlc-rails
+layout: tri
+space: 2.0
+max_size: [100, 100]
+boards:
+  - [tri30-3535x10-p6.2-shallow-rot, tri30-3535x10-p5-shallow-pvia, tri30-2020x36-p2.95-shallow-pvia, tri30-2020x28-p3.4-shallow-pvia]

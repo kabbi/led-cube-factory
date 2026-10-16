@@ -1,0 +1,10 @@
+# Ten 3535 triangles: two rows of five, nested apex-to-edge, the second row
+# mirrored so flat edges face flat edges. (A third row still fits 100 x 100
+# mm -- rows: 3 makes it 15, 99.2 x 95.9 mm.)
+preset: jlc-rails
+layout: tri
+board: tri30-3535x10-p6.2-shallow-rot
+rows: 2
+cols: 5
+space: 2.0
+max_size: [100, 100]

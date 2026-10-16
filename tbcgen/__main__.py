@@ -4,7 +4,8 @@
   check   run DRC, fail on errors or unconnected items
   render  top/bottom PNG renders and per-layer SVGs
   fab     JLCPCB gerbers (KiKit), BOM and CPL
-  panel   KiKit panel from panels/<preset>.json (default: jlc-2x2)
+  panel   panels from panels/*.yaml, boards built first (names given are
+          panels, not boards)
   all     build + check + render + fab
   release freeze build/<board> into releases/<board>-<rev>/ (refuses to overwrite)
   model   3D model (GLB) of each built board, for demos and docs
@@ -52,15 +53,39 @@ def cmd_shapes(a):
     return 0
 
 
+def cmd_panel(a):
+    from . import panel
+    failed = []
+    for name in a.boards or panel.all_panels():
+        spec = panel.load_panel(name)
+        print(f"[panel {name}]", flush=True)
+        t0 = time.time()
+        pp, size, ntabs, res = outputs.panel(spec)
+        n = sum(len(row) for row in spec["boards"])
+        print(f"  {pp}\n  {size[0]:.2f} x {size[1]:.2f} mm, {n} boards, {ntabs} tabs")
+        print(f"  DRC: {res['errors']} errors, {res['warnings']} warnings, "
+              f"{res['unconnected']} unconnected")
+        for k, c in res["by_type"].items():
+            print(f"    {c:4d} {k}")
+        print(f"  done in {time.time() - t0:.1f}s")
+        if res["errors"] or res["unconnected"]:
+            failed.append(name)
+    if failed:
+        print(f"FAILED: {', '.join(failed)}")
+        return 1
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="tbcgen", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("command", choices=["build", "check", "render", "fab", "panel", "all",
                                         "release", "model", "shapes", "docs"])
     ap.add_argument("boards", nargs="*")
-    ap.add_argument("--preset", default="jlc-2x2")
     a = ap.parse_args(argv)
 
+    if a.command == "panel":
+        return cmd_panel(a)
     if a.command == "shapes":
         return cmd_shapes(a)
     if a.command == "docs":
@@ -94,9 +119,6 @@ def main(argv=None):
             print(f"  preview: {models.render_png(glb) or 'skipped (no Blender)'}")
         if a.command == "release":
             print(f"  release: {outputs.release(cfg, out)}")
-        if a.command == "panel":
-            preset = config.ROOT / "panels" / f"{a.preset}.json"
-            print(f"  panel: {outputs.panel(cfg, pcb, out, preset)}")
         print(f"  done in {time.time() - t0:.1f}s")
         if not ok:
             failed.append(cfg["name"])

@@ -24,7 +24,7 @@ hand-drawn back side -- is shared.
 make setup                                 # once: venv on KiCad's Python + KiKit
 make all                                   # build + DRC + render + fab every board, then tests
 make all BOARDS=sq30-2020x64-p3.4-tpl      # just one
-make panel BOARDS=sq30-2020x64-p3.4-tpl    # 2x2 KiKit panel (panels/jlc-2x2.json)
+make panel PANELS=tri30-mix-4             # panels from panels/*.yaml (boards built first)
 make release BOARDS=sq30-2020x64-p3.4-tpl  # freeze into releases/sq30-2020x64-p3.4-tpl-A/ before ordering
 ```
 
@@ -42,12 +42,13 @@ lib/
   tbc.3dshapes/    3D models not in KiCad's stock library
   tbc.kicad_dru    shared custom DRC rules
   templates/       hand-drawn "chassis" boards (outline, connectors, back side)
-panels/            KiKit panel presets
+panels/            one YAML per panel (which boards where) + KiKit presets
 tbcgen/            the generator
   geometry.py      outlines, ports, LED grids, chain order (pure Python)
   board.py         pcbnew: placement, routing order, planes
   router.py        small grid A* router (front data chain, power vias)
   outputs.py       project files, DRC, renders, fab, panel, release
+  panel.py         panel layouts, tabs and mousebites (on KiKit)
   models.py        board GLBs, polyhedra assembled from them
   docs.py          docs/ pages from build/
 tools/
@@ -77,7 +78,8 @@ releases/<board>-<rev>/   committed snapshots of what was actually ordered
    pad, then the data chain (shortest links first), then the chain ends to
    the template's WS_IN / WS_OUT hand-off vias. Vias avoid the back's copper.
 4. **Planes**: In1 = GND, In2 = +5V, poured around everything.
-5. **Check**: `kicad-cli pcb drc` (zones refilled), must be 0 errors and
+5. **Check**: `kicad-cli pcb drc` (zones refilled and saved -- the gerbers
+   are plotted from the saved fill), must be 0 errors and
    0 unconnected; tests check the back is bit-for-bit the template.
 
 ## Templates (the hand-drawn back side)
@@ -187,6 +189,40 @@ Experiments, 2026-10-16 (2020, 2.95 mm unless noted, 0.127/0.1 rules):
 | tri 7 rows, 3.4 mm | 0.127/0.1, hole-copper 0.25 | P3 fails |
 | tri 7 rows, 3.4 mm | 0.127/0.1, hole-copper 0.2 | **DRC clean**, 54/56 patterned: `tri30-2020x28-p3.4-shallow-pvia` |
 | sq 7x7, 3.4 mm | default rules | row return fails |
+
+## Panels
+
+`panels/<name>.yaml` puts built boards on one panel (`make panel`, output in
+`build/panels/<name>/`: the panel, `panel.png`, JLC gerbers, BOM and CPL with
+per-board designators `D1_3`, and a DRC report):
+
+```yaml
+preset: jlc-rails      # panels/jlc-rails.json: 5mm rails, tooling, fiducials, mousebite style
+layout: tri            # grid | tri (rows alternating apex up/down, nested)
+board: tri30-3535x10-p6.2-shallow-rot
+rows: 2
+cols: 5
+space: 2.0             # mm between boards and to the rails
+max_size: [100, 100]   # fail if the panel comes out bigger
+# or, mixed: boards: [[a, b, c, d], ...] instead of board/rows/cols
+```
+
+| panel | size | boards |
+|---|---|---|
+| `sq30-2020x64-p3.4-tpl-3x2` | 94 x 76 mm | 6 |
+| `sq30-3535x16-p6.2-pvia-3x2` | 94 x 76 mm | 6 |
+| `tri30-3535x10-p6.2-shallow-rot-2x5` | 99.2 x 68.0 mm | 10 (3 rows, 15, still fit 100 x 100) |
+| `tri30-mix-4` | 81.9 x 40.0 mm | one of each triangle |
+
+The connector pads take the middle 22.5 mm of every edge, so tabs only fit in
+the ~3.7 mm next to each corner (measured per board). Mousebites have to
+cover the whole joint -- tab plus the fillets a 2 mm cutter leaves either side
+(`post.millradius`), and at a junction of triangle corners everything the
+cutter can't reach -- so the cut lines are read off the panel as milled, not
+planned: any joint that would reach copper fails the build. Holes sit just
+outside the board edge (`offset: -0.25mm`), clear of the inner planes, so
+expect small nubs near the corners after breaking out. A mixed panel's DRC
+uses the finest rules among its boards (each has passed its own DRC).
 
 ## Router engines
 

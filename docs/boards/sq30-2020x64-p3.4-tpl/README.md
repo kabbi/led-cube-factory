@@ -142,6 +142,7 @@ LED index in the data chain -> position, mm from the board centre (y down, top v
 ## Used in
 
 - [cube--sq30-2020x64-p3.4-tpl](../../shapes/cube--sq30-2020x64-p3.4-tpl/README.md)
+- [cuboctahedron--sq30-2020x64-p3.4-tpl+tri30-2020x28-p3.4-shallow-pvia](../../shapes/cuboctahedron--sq30-2020x64-p3.4-tpl+tri30-2020x28-p3.4-shallow-pvia/README.md)
 
 ## Files
 

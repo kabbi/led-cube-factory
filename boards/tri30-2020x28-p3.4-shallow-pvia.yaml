@@ -1,0 +1,21 @@
+# Triangle tile, 7+6+...+1 WS2812B-2020 at 3.4mm pitch -- same LED and pitch
+# as the 8x8 sq30-2020x64-p3.4-tpl. 0.28mm from the LED pads to the shallow
+# connector pads.
+shape: tri
+edge: 30.0
+connector: edge_connector_shallow
+leds:
+  part: ws2812b-2020
+  rows: 7
+  pitch: 3.4
+caps: {along: [8.0], inset: 3.0}
+hubs:
+  radius: 5.5
+  jumper_radius: 3.0
+  label_offset: [0, 0.3]
+router:
+  power_vias: pattern
+# default rules leave a port (P1/P2/P3, by hub layout) boxed in on the back,
+# or need the hubs so tight their jumpers collide; the dense pair's rules
+# (JLC multilayer minimums) route with 54/56 vias patterned
+rules: {track_width: 0.127, clearance: 0.1, hole_copper_clearance: 0.2}

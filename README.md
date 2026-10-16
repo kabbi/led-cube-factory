@@ -182,7 +182,10 @@ Experiments, 2026-10-16 (2020, 2.95 mm unless noted, 0.127/0.1 rules):
 | sq 8x8 | hole-copper 0.25, any of 4 hub layouts | row return fails |
 | sq 8x8 | hole-copper 0.2, default hubs | P4 fails |
 | sq 8x8 | hole-copper 0.2, hubs angle 90 / 180 / r6.5 / r7.5 | all **DRC clean**, ~360 s |
-| tri 7 rows, 3.4 mm | default rules | P1 fails |
+| tri 7 rows, 3.4 mm | default rules, hubs r5.5 / r6.5 / r5.0-5.2 / angle 180 | a port or hub boxed in |
+| tri 7 rows, 3.4 mm | default rules, hubs r4.5 (jumper r2.0 / 2.4) | routes, jumper courtyards overlap |
+| tri 7 rows, 3.4 mm | 0.127/0.1, hole-copper 0.25 | P3 fails |
+| tri 7 rows, 3.4 mm | 0.127/0.1, hole-copper 0.2 | **DRC clean**, 54/56 patterned: `tri30-2020x28-p3.4-shallow-pvia` |
 | sq 7x7, 3.4 mm | default rules | row return fails |
 
 ## Router engines

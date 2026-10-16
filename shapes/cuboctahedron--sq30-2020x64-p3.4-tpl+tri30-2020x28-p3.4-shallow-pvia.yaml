@@ -1,0 +1,4 @@
+# Eight 28-LED 2020 triangles and six hand-drawn 8x8 2020 squares, all at
+# 3.4mm, 608 LEDs.
+solid: cuboctahedron
+boards: {square: sq30-2020x64-p3.4-tpl, tri: tri30-2020x28-p3.4-shallow-pvia}

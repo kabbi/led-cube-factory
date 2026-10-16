@@ -37,7 +37,7 @@ Triangle tile, 8+7+...+1 WS2812B-2020 at 2.95mm pitch: the most 2020s a 30mm tri
 |---|---|
 | DRC | 0 errors, 0 warnings, 0 unconnected |
 | Front track | 174 mm |
-| Back track | 170 mm |
+| Back track | 172 mm |
 | In2 hops | 14.4 mm |
 | Vias | 92 |
 

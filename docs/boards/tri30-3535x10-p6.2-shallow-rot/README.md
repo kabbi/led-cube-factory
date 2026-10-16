@@ -37,7 +37,7 @@ Triangle tile, 4+3+2+1 WS2812B-Mini (3535) at 6.2mm pitch: outer-ring LEDs turne
 |---|---|
 | DRC | 0 errors, 0 warnings, 0 unconnected |
 | Front track | 112 mm |
-| Back track | 100 mm |
+| Back track | 99 mm |
 | In2 hops | 1.9 mm |
 | Vias | 33 |
 

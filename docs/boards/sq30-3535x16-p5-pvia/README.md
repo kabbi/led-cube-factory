@@ -35,10 +35,10 @@
 | | |
 |---|---|
 | DRC | 0 errors, 0 warnings, 0 unconnected |
-| Front track | 176 mm |
-| Back track | 196 mm |
-| In2 hops | 0 mm |
-| Vias | 46 |
+| Front track | 179 mm |
+| Back track | 199 mm |
+| In2 hops | 1.4 mm |
+| Vias | 47 |
 
 ## Renders
 

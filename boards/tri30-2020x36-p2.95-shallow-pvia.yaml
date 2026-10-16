@@ -1,0 +1,22 @@
+# Triangle tile, 8+7+...+1 WS2812B-2020 at 2.95mm pitch: the most 2020s a
+# 30mm triangle takes, 8 per side like sq30-2020x64-p2.95-pvia. The LED pads
+# (1.55mm towards a slanted edge) set the pitch: 2.95mm leaves 0.2mm to the
+# shallow connector pads.
+shape: tri
+edge: 30.0
+connector: edge_connector_shallow
+leds:
+  part: ws2812b-2020
+  rows: 8
+  pitch: 2.95
+caps: {along: [8.0], inset: 3.0}
+hubs:
+  radius: 5.5
+  jumper_radius: 3.0
+  label_offset: [0, 0.3]
+router:
+  power_vias: pattern
+# 0.42mm between neighbouring LEDs' pads: links squeeze through diagonally,
+# and vias pack 0.6mm apart. At JLC's multilayer minimums (0.09 track/space,
+# 0.2 via hole to copper), not the defaults' margin.
+rules: {track_width: 0.127, clearance: 0.1, hole_copper_clearance: 0.2}

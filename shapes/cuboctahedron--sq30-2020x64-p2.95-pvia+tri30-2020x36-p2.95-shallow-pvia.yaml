@@ -1,0 +1,4 @@
+# The dense cuboctahedron: eight 36-LED triangles and six 8x8 squares, all
+# 2020s at 2.95mm, 672 LEDs.
+solid: cuboctahedron
+boards: {square: sq30-2020x64-p2.95-pvia, tri: tri30-2020x36-p2.95-shallow-pvia}

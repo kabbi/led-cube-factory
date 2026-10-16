@@ -1,0 +1,18 @@
+# 8x8 WS2812B-2020 tile at 2.95mm pitch -- same LED, pitch and LEDs per side
+# as the triangle tri30-2020x36-p2.95-shallow-pvia.
+shape: square
+edge: 30.0
+leds:
+  part: ws2812b-2020
+  cols: 8
+  rows: 8
+  pitch: 2.95
+# hub layout turned over (PASS at the bottom): its jumpers displace the
+# fewest patterned vias (125/128), and the left port P4 gets through
+hubs: {angle: 180}
+router:
+  power_vias: pattern
+# 0.42mm between neighbouring LEDs' pads: links squeeze through diagonally,
+# and vias pack 0.6mm apart. At JLC's multilayer minimums (0.09 track/space,
+# 0.2 via hole to copper), not the defaults' margin.
+rules: {track_width: 0.127, clearance: 0.1, hole_copper_clearance: 0.2}

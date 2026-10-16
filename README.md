@@ -148,6 +148,43 @@ corners; `tri30-3535x10-p6.2-shallow-rot` gets 6.2 mm with 0.4 mm left (0.6
 mm on the flat ones). Patterned power vias need one rotation, so it uses
 nearest-spot vias.
 
+### Dense 2020 pair (8 LEDs per side)
+
+`tri30-2020x36-p2.95-shallow-pvia` and `sq30-2020x64-p2.95-pvia` share LED,
+pitch and LEDs per side, so the triangle sets the numbers. A 2020's pads
+reach 1.55 mm towards a slanted edge (more than its body), so 8 rows fit up
+to ~2.97 mm pitch with 0.15 mm to the shallow connector pads; 2.95 mm leaves
+0.2 mm. What it took to route:
+
+- **Pad gaps.** Neighbouring LEDs' pads are 0.42 mm apart and DOUT/DIN sit
+  diagonally opposite, so in-row links squeeze between the GND and VDD pads.
+  That needs `rules: {track_width: 0.127, clearance: 0.1}` (JLC multilayer
+  does 0.09/0.09).
+- **Via holes.** Vias keep `hole_copper_clearance` (hole to other copper,
+  default 0.25) even when `clearance` is finer: the router paints them as
+  bigger copper discs. At 0.25 the via grid is too sparse for the chain's row
+  returns; 0.2 (JLC's "via hole to track" minimum) routes. Default boards are
+  unaffected (0.15 clearance + 0.1 annular ring = 0.25 already).
+- **Courtyard.** The 2020 courtyard is pads + 0.15 mm (was + 0.25, wider
+  than the 2.95 mm pitch).
+- **Hubs.** The back jumpers displace patterned vias; on the square
+  `hubs: {angle: 180}` displaces the fewest (125/128 patterned) and lets P4
+  through. Default placement left P4 boxed in.
+
+Experiments, 2026-10-16 (2020, 2.95 mm unless noted, 0.127/0.1 rules):
+
+| board | change | result |
+|---|---|---|
+| tri 8 rows | 0.2/0.15 rules | in-row link boxed in |
+| tri 8 rows | hole-copper 0.25 | row return boxed in (36/72 vias patterned) |
+| tri 8 rows | hole-copper 0.2 | **DRC clean**, 57/72 patterned, ~165 s |
+| tri 8 rows | 0.4/0.2 vias | port P3 fails |
+| sq 8x8 | hole-copper 0.25, any of 4 hub layouts | row return fails |
+| sq 8x8 | hole-copper 0.2, default hubs | P4 fails |
+| sq 8x8 | hole-copper 0.2, hubs angle 90 / 180 / r6.5 / r7.5 | all **DRC clean**, ~360 s |
+| tri 7 rows, 3.4 mm | default rules | P1 fails |
+| sq 7x7, 3.4 mm | default rules | row return fails |
+
 ## Router engines
 
 `router.engine: internal` (default) is the in-house grid router.

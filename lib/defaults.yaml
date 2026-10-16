@@ -56,6 +56,8 @@ rules:                   # JLCPCB 4-layer standard capabilities, with margin
   via_diameter: 0.5
   via_drill: 0.3
   hole_clearance: 0.25   # hole to hole
+  hole_copper_clearance: 0.25  # hole to other copper (vias keep this even
+                         # when clearance is set finer)
   edge_clearance: 0.3    # tracks, vias, zones to board edge
   pad_edge_clearance: 0.05  # castellated edge pads sit right at the edge
   zone_clearance: 0.2

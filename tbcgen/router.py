@@ -39,6 +39,13 @@ class Grid:
         self.hw = rules["track_width"] / 2
         self.via_r = rules["via_diameter"] / 2
         self.infl = rules["clearance"] + self.hw + self.res * 0.75
+        # via copper to other copper: the clearance, or more if the hole needs
+        # it (fine-pitch boards set clearance below hole_copper_clearance -
+        # annular ring); vias are painted that much bigger
+        annular = (rules["via_diameter"] - rules["via_drill"]) / 2
+        # (rounded: 0.25 - 0.1 > 0.15 in floats would grow every via a cell)
+        self.via_clr = round(max(rules["clearance"], rules["hole_copper_clearance"] - annular), 6)
+        self.via_grow = round(self.via_clr - rules["clearance"], 6)
         x0, y0, x1, y1 = outline_poly.bounds
         self.x0, self.y0 = x0, y0
         self.nx = int(math.ceil((x1 - x0) / self.res)) + 1
@@ -101,14 +108,14 @@ class Grid:
         self.paint([layer], geom, net)
 
     def add_via(self, x, y, net, r=None, drill=None):
-        self.paint(self.layers, Point(x, y).buffer(r or self.via_r), net)
+        self.paint(self.layers, Point(x, y).buffer((r or self.via_r) + self.via_grow), net)
         self.add_hole(x, y, drill or self.rules["via_drill"])
 
     def via_ok(self, net):
         foreign = np.zeros((self.ny, self.nx), bool)
         for g in self.owner.values():
             foreign |= (g != 0) & (g != net)
-        k = int(math.ceil((self.via_r - self.hw) / self.res))
+        k = int(math.ceil((self.via_r + self.via_grow - self.hw) / self.res))
         grown = foreign.copy()
         if k > 0:
             p = np.pad(foreign, k, constant_values=True)

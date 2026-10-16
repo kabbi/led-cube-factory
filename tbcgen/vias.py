@@ -38,6 +38,7 @@ def plan(b):
     pins = cfg["_led"]["pins"]
     leds, n = b.leds, len(b.leds)
     hw, vr, clr = g.hw, g.via_r, b.rules["clearance"]
+    vclr = g.via_clr                            # via copper to other copper
     hole = b.rules["via_drill"] + b.rules["hole_clearance"]
     D = lambda k, role: b.pad(b.fps[f"D{k}"], pins[role])
     xy = lambda pad: (pcbnew.ToMM(pad.GetPosition().x), pcbnew.ToMM(pad.GetPosition().y))
@@ -59,12 +60,12 @@ def plan(b):
             yb = b.cy + y0 + frac * (y1 - y0)
             lines.append(LineString([a, (a[0], yb), (c[0], yb), c]))
         geom = shapely.union_all(lines)
-        return (_mask(g, geom.buffer(vr + clr + hw + g.res)),      # no via here
+        return (_mask(g, geom.buffer(vr + vclr + hw + g.res)),      # no via here
                 _mask(g, geom.buffer(2 * hw + clr + g.res)))       # no stub here
 
     # candidate offsets: rays from the pad centre
     step = 2 * g.res
-    dists = [float(d) for d in np.arange(vr + clr, 2.2, step)]
+    dists = [float(d) for d in np.arange(vr + vclr, 2.2, step)]
     cands = [(round(dx * d, 4), round(dy * d, 4)) for dx, dy in RAYS for d in dists]
 
     nets = {role: D(1, role).GetNetCode() for role in ("VDD", "GND")}
@@ -95,7 +96,7 @@ def plan(b):
     pad_off = {role: (xy(D(1, role))[0] - (b.cx + leds[0].x), xy(D(1, role))[1] - (b.cy + leds[0].y))
                for role in nets}
     nbrs = neighbour_vectors()
-    min_gap = max(2 * vr + clr, hole)
+    min_gap = max(2 * vr + vclr, hole)
 
     def compatible(ov, og):
         # VDD via of one LED vs GND via of the same / a neighbouring LED

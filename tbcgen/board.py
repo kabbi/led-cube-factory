@@ -280,7 +280,7 @@ class BoardBuilder:
                     if pad.IsOnLayer(LAYER_IDS[L]):
                         poly = pad_poly(pad, LAYER_IDS[L])
                         g.paint([L], poly, net)
-                        g.block_vias(poly, g.via_r + self.rules["clearance"])
+                        g.block_vias(poly, g.via_r + g.via_clr)
                 if pad.HasHole():
                     x, y = to_mm(pad.GetPosition())
                     g.add_hole(x, y, pcbnew.ToMM(pad.GetDrillSize().x))

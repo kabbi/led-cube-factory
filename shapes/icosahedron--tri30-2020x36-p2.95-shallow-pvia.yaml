@@ -1,0 +1,3 @@
+# The dense icosahedron: twenty 36-LED 2020 triangles, 720 LEDs.
+solid: icosahedron
+boards: {tri: tri30-2020x36-p2.95-shallow-pvia}

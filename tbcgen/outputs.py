@@ -44,7 +44,7 @@ def write_project(cfg, out):
                 "min_hole_to_hole": r["hole_clearance"],
                 "min_copper_edge_clearance": r["pad_edge_clearance"],
                 "min_via_annular_width": 0.1,
-                "min_hole_clearance": 0.25,
+                "min_hole_clearance": r["hole_copper_clearance"],
                 "min_text_height": 0.8,
                 "min_text_thickness": 0.08,
             },

@@ -1,0 +1,10 @@
+# 3x2 of the 2020 hexagon on 5mm rails top and bottom. Side by side the
+# hexagons meet corner to corner, so tabs are on the flat top and bottom edges
+# only: board to board and board to rail. (Nesting them honeycomb-style saves
+# no area at six boards.)
+preset: jlc-rails
+layout: grid
+board: hex30-2020x169-p3.7-pvia
+rows: 2
+cols: 3
+space: 2.0

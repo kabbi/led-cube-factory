@@ -250,6 +250,12 @@ max_size: [100, 100]   # fail if the panel comes out bigger
 | `sq30-3535x16-p6.2-pvia-3x2` | 94 x 76 mm | 6 |
 | `tri30-3535x10-p6.2-shallow-rot-2x5` | 99.2 x 68.0 mm | 10 (3 rows, 15, still fit 100 x 100) |
 | `tri30-mix-4` | 81.9 x 40.0 mm | one of each triangle |
+| `hex30-5050x37-p8-pvia-3x2` | 184.0 x 119.9 mm | 6 |
+| `hex30-2020x169-p3.7-pvia-3x2` | 184.0 x 119.9 mm | 6 |
+
+Hexagons in a grid meet corner to corner side by side, so their tabs are on
+the flat top and bottom edges only (3 joints per column, 18 tabs). A
+honeycomb (columns offset by half a board) saves no area at six boards.
 
 The connector pads take the middle 22.5 mm of every edge, so tabs only fit in
 the ~3.7 mm next to each corner (measured per board). Mousebites have to

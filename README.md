@@ -238,24 +238,24 @@ mate with the 30 mm tiles. They also use `jumper: jumper_small`, 1.45 x
 0.8 mm with a 0.25 mm gap (bridge with solder or a 0402 0R): twelve of the
 1.3 mm ones don't fit. `caps.ports` puts caps on some ports only.
 
-`sq15-5050x4-p5.5-micro-pvia`: 2x2 5050s at 5.5 mm pitch (courtyards
-touching). It fits 13 mm, the LED bodies 0.3 mm from the connector pads
-(built and DRC clean that way with a 10.2 mm-span connector); 15 mm matches
-the 2020 tile. Hubs at `jumper_radius: 1.6` on a 3 mm circle, turned over
-(`angle: 180`: at 13 mm the default layout left P4 boxed in), one 0603 cap
-by P2.
+`sq15-5050x4-p7.5-micro-pvia`: 2x2 5050s at 7.5 mm pitch, half the edge,
+so the LED grid stays even across tile edges; the LED bodies keep 0.3 mm to
+the connector pads. At 5.5 mm pitch (courtyards touching) the tile fits
+13 mm (built and DRC clean that way). Hubs at `jumper_radius: 1.6` on a
+3 mm circle, turned over (`angle: 180`: at 13 mm the default layout left P4
+boxed in), one 0603 cap by P2.
 
-`sq15-2020x16-p2.85-micro-pvia`: 4x4 2020s at 2.85 mm pitch (courtyards
-just clear), the dense pair's rules. It fits 13.5 mm, the LED pads 0.25 mm
-from the connector pads; 15 mm matches the 5050 tile. The hard part is the
-back: three hubs times four ports need at least two In2 crossings, and a
-through via has to clear the front too, where the 2020 pad rows are 0.32 mm
-apart, so only the LED column gaps take vias (mostly the power vias).
-Swept 2026-10-18 (hub angle in 45 deg steps x circle x jumper radius x cap
-spot): at 13.5 mm 1 of 144 layouts was DRC clean (P2 the usual loser; IN
-and OUT in opposite corners, next to D1 and D16, didn't help), at 15 mm 5 of
-128; it uses `hubs: {angle: 180, radius: 4.2, jumper_radius: 1.7}`, clean
-with either cap spot tried.
+`sq15-2020x16-p3.35-micro-pvia`: 4x4 2020s at 3.35 mm pitch, the widest
+that keeps the LED pads 0.26 mm from the connector pads, on default rules.
+The hard part is the back: three hubs times four ports need at least two
+In2 crossings, and a through via has to clear the front too. Swept
+2026-10-18 (hub angle in 45 deg steps x circle x jumper radius x cap spot):
+
+| edge, pitch | rules | DRC clean | why |
+|---|---|---|---|
+| 13.5 mm, 2.85 mm | 0.127/0.1, hole-copper 0.2 | 1 of 144 | pad rows 0.32 mm apart: vias only in the column gaps |
+| 15 mm, 2.85 mm | same | 5 of 128 | |
+| 15 mm, 3.35 mm | default | 5 of 48 | pad rows 0.82 mm apart: vias fit between rows too |
 
 `sq8-5050x1-p5.5-micro-grp-nopass-pvia` is the 1-LED end: one 5050 on an
 8 mm square (the front alone would fit 7.5 mm), no cap, no PASS hub.

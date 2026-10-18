@@ -1,6 +1,6 @@
-# sq15-2020x16-p2.85-micro-pvia
+# sq15-2020x16-p3.35-micro-pvia
 
-4x4 WS2812B-2020 at 2.85mm pitch (courtyards just clear) on a 15mm square, with the micro edge connector like the other small tiles. Fits 13.5mm (the LED pads 0.25mm from the connector pads); 15mm to match the 2x2 5050.
+4x4 WS2812B-2020 on a 15mm square at 3.35mm pitch, the widest that keeps the LED pads 0.26mm from the micro edge connector's pads. (2.85mm fits a 13.5mm edge, but needs the dense pair's fine rules.)
 
 <img src="model.png" width="480" alt="3D render">
 
@@ -12,11 +12,11 @@
 | LEDs | 16 x WS2812B-2020 (4 x 4) |
 | Footprint | `tbc:LED_WS2812B-2020_PLCC4_2.0x2.0mm` |
 | LCSC | C52917434 |
-| Pitch | 2.85 mm |
+| Pitch | 3.35 mm |
 | Rotation | one rotation, DOUT to the right |
 | Chain | raster |
 | Edge connector | `edge_connector_micro` (`tbc:edge_conn_micro`) |
-| Back side | generated: IN/OUT/PASS jumper hubs with 4 wings each (1.7 mm from the hub centre, hubs on a 4.2 mm circle), 1 cap on P2 |
+| Back side | generated: IN/OUT/PASS jumper hubs with 4 wings each (1.5 mm from the hub centre, hubs on a 4.2 mm circle), 1 cap on P2 |
 | Power vias | pattern |
 | Router | internal |
 | Revision | A |
@@ -27,7 +27,7 @@
 |---|---|
 | `sq15` | square, 15 mm edge |
 | `2020x16` | 16 LEDs in the 2020 package |
-| `p2.85` | 2.85 mm LED pitch |
+| `p3.35` | 3.35 mm LED pitch |
 | `micro` | micro edge connector (small tiles) |
 | `pvia` | patterned power vias |
 
@@ -36,10 +36,10 @@
 | | |
 |---|---|
 | DRC | 0 errors, 0 warnings, 0 unconnected |
-| Front track | 118 mm |
-| Back track | 70 mm |
-| In2 hops | 5.5 mm |
-| Vias | 40 |
+| Front track | 94 mm |
+| Back track | 82 mm |
+| In2 hops | 17.5 mm |
+| Vias | 43 |
 
 ## Renders
 
@@ -66,22 +66,22 @@ LED index in the data chain -> position, mm from the board centre (y down, top v
 
 | LED | x | y |
 |---|---|---|
-| 1 | -4.28 | -4.28 |
-| 2 | -1.43 | -4.28 |
-| 3 | 1.43 | -4.28 |
-| 4 | 4.28 | -4.28 |
-| 5 | -4.28 | -1.43 |
-| 6 | -1.43 | -1.43 |
-| 7 | 1.43 | -1.43 |
-| 8 | 4.28 | -1.43 |
-| 9 | -4.28 | 1.43 |
-| 10 | -1.43 | 1.43 |
-| 11 | 1.43 | 1.43 |
-| 12 | 4.28 | 1.43 |
-| 13 | -4.28 | 4.28 |
-| 14 | -1.43 | 4.28 |
-| 15 | 1.43 | 4.28 |
-| 16 | 4.28 | 4.28 |
+| 1 | -5.03 | -5.03 |
+| 2 | -1.68 | -5.03 |
+| 3 | 1.68 | -5.03 |
+| 4 | 5.03 | -5.03 |
+| 5 | -5.03 | -1.68 |
+| 6 | -1.68 | -1.68 |
+| 7 | 1.68 | -1.68 |
+| 8 | 5.03 | -1.68 |
+| 9 | -5.03 | 1.68 |
+| 10 | -1.68 | 1.68 |
+| 11 | 1.68 | 1.68 |
+| 12 | 5.03 | 1.68 |
+| 13 | -5.03 | 5.03 |
+| 14 | -1.68 | 5.03 |
+| 15 | 1.68 | 5.03 |
+| 16 | 5.03 | 5.03 |
 
 | Port | x | y | facing |
 |---|---|---|---|
@@ -94,10 +94,10 @@ LED index in the data chain -> position, mm from the board centre (y down, top v
 
 ## Used in
 
-- [cube--sq15-2020x16-p2.85-micro-pvia](../../shapes/cube--sq15-2020x16-p2.85-micro-pvia/README.md)
+- [cube--sq15-2020x16-p3.35-micro-pvia](../../shapes/cube--sq15-2020x16-p3.35-micro-pvia/README.md)
 
 ## Files
 
-- config: [boards/sq15-2020x16-p2.85-micro-pvia.yaml](../../../boards/sq15-2020x16-p2.85-micro-pvia.yaml)
-- rebuild: `make all model BOARDS=sq15-2020x16-p2.85-micro-pvia && make docs`
-- KiCad project, gerbers, BOM/CPL: `build/sq15-2020x16-p2.85-micro-pvia/` (not committed)
+- config: [boards/sq15-2020x16-p3.35-micro-pvia.yaml](../../../boards/sq15-2020x16-p3.35-micro-pvia.yaml)
+- rebuild: `make all model BOARDS=sq15-2020x16-p3.35-micro-pvia && make docs`
+- KiCad project, gerbers, BOM/CPL: `build/sq15-2020x16-p3.35-micro-pvia/` (not committed)

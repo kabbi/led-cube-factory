@@ -1,0 +1,19 @@
+# 4x4 WS2812B-2020 on a 15mm square at 3.35mm pitch, the widest that keeps
+# the LED pads 0.26mm from the micro edge connector's pads. (2.85mm fits a
+# 13.5mm edge, but needs the dense pair's fine rules.)
+shape: square
+edge: 15.0
+connector: edge_connector_micro
+jumper: jumper_small
+leds:
+  part: ws2812b-2020
+  cols: 4
+  rows: 4
+  pitch: 3.35
+# one 0603 cap, in a corner by P2 the hubs leave free
+caps: {part: c100n-0603, ports: [2], along: [3.2], inset: 1.9}
+# default rules: 5 of 48 hub layouts route clean (vias now fit between the
+# 0.82mm-apart pad rows, not just the column gaps)
+hubs: {angle: 180, radius: 4.2, jumper_radius: 1.5}
+router:
+  power_vias: pattern

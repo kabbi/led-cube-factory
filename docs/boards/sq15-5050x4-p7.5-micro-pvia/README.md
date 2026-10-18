@@ -1,6 +1,6 @@
-# sq15-5050x4-p5.5-micro-pvia
+# sq15-5050x4-p7.5-micro-pvia
 
-2x2 WS2812B 5050 at 5.5mm pitch (courtyards touching) on a 15mm square, with the micro edge connector like the other small tiles. Fits 13mm (the LED bodies 0.3mm from the connector pads); 15mm to match the 4x4 2020.
+2x2 WS2812B 5050 on a 15mm square at 7.5mm pitch, half the edge, so the LED grid stays even across tile edges; the widest that keeps the LED bodies 0.3mm from the micro edge connector's pads. (5.5mm, courtyards touching, fits a 13mm edge.)
 
 <img src="model.png" width="480" alt="3D render">
 
@@ -12,7 +12,7 @@
 | LEDs | 4 x WS2812B (2 x 2) |
 | Footprint | `tbc:LED_WS2812B_PLCC4_5.0x5.0mm_InnerPads` |
 | LCSC | C52917433 |
-| Pitch | 5.5 mm |
+| Pitch | 7.5 mm |
 | Rotation | one rotation, DOUT to the right |
 | Chain | raster |
 | Edge connector | `edge_connector_micro` (`tbc:edge_conn_micro`) |
@@ -27,7 +27,7 @@
 |---|---|
 | `sq15` | square, 15 mm edge |
 | `5050x4` | 4 LEDs in the 5050 package |
-| `p5.5` | 5.5 mm LED pitch |
+| `p7.5` | 7.5 mm LED pitch |
 | `micro` | micro edge connector (small tiles) |
 | `pvia` | patterned power vias |
 
@@ -36,10 +36,10 @@
 | | |
 |---|---|
 | DRC | 0 errors, 0 warnings, 0 unconnected |
-| Front track | 44 mm |
-| Back track | 66 mm |
+| Front track | 52 mm |
+| Back track | 58 mm |
 | In2 hops | 0 mm |
-| Vias | 18 |
+| Vias | 17 |
 
 ## Renders
 
@@ -66,10 +66,10 @@ LED index in the data chain -> position, mm from the board centre (y down, top v
 
 | LED | x | y |
 |---|---|---|
-| 1 | -2.75 | -2.75 |
-| 2 | 2.75 | -2.75 |
-| 3 | -2.75 | 2.75 |
-| 4 | 2.75 | 2.75 |
+| 1 | -3.75 | -3.75 |
+| 2 | 3.75 | -3.75 |
+| 3 | -3.75 | 3.75 |
+| 4 | 3.75 | 3.75 |
 
 | Port | x | y | facing |
 |---|---|---|---|
@@ -82,10 +82,10 @@ LED index in the data chain -> position, mm from the board centre (y down, top v
 
 ## Used in
 
-- [cube--sq15-5050x4-p5.5-micro-pvia](../../shapes/cube--sq15-5050x4-p5.5-micro-pvia/README.md)
+- [cube--sq15-5050x4-p7.5-micro-pvia](../../shapes/cube--sq15-5050x4-p7.5-micro-pvia/README.md)
 
 ## Files
 
-- config: [boards/sq15-5050x4-p5.5-micro-pvia.yaml](../../../boards/sq15-5050x4-p5.5-micro-pvia.yaml)
-- rebuild: `make all model BOARDS=sq15-5050x4-p5.5-micro-pvia && make docs`
-- KiCad project, gerbers, BOM/CPL: `build/sq15-5050x4-p5.5-micro-pvia/` (not committed)
+- config: [boards/sq15-5050x4-p7.5-micro-pvia.yaml](../../../boards/sq15-5050x4-p7.5-micro-pvia.yaml)
+- rebuild: `make all model BOARDS=sq15-5050x4-p7.5-micro-pvia && make docs`
+- KiCad project, gerbers, BOM/CPL: `build/sq15-5050x4-p7.5-micro-pvia/` (not committed)

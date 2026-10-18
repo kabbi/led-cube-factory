@@ -227,7 +227,7 @@ The generated hex board is 3.5x the square's area, so the router's grid
 is too: `Grid._window` now prepares its shapes before testing grid points
 (~40x faster on board-sized polygons like the data corridors; same result).
 
-### Mini tile (2x2 5050)
+### Mini tiles (2x2 5050, 4x4 2020)
 
 `sq13-5050x4-p5.5-mini-pvia` is the smallest tile a 2x2 of 5050s fits:
 5.5 mm pitch (courtyards touching), and a 13 mm edge leaves the LED bodies
@@ -242,6 +242,18 @@ is too: `Grid._window` now prepares its shapes before testing grid points
   (`angle: 180`): the default layout leaves P4 boxed in.
 - **Caps.** `caps.ports` puts caps on some ports only: one 0603 in the
   free corner by P2.
+
+`sq13.5-2020x16-p2.85-mini-pvia` is the same idea for a 4x4 of 2020s:
+2.85 mm pitch (courtyards just clear), 13.5 mm edge, LED pads 0.25 mm from
+the connector pads, the dense pair's rules. The hard part is the back:
+three hubs times four ports need at least two In2 crossings, and a through
+via has to clear the front too, where the 2020 pad rows are 0.32 mm apart,
+so only the LED column gaps take vias (mostly the power vias). Of 144
+layouts swept (hub angle in 45 deg steps x circle 2.6/3.0/3.4 x jumper
+radius 1.5/1.7 x cap spot) three route and one is DRC clean:
+`hubs: {angle: 180, radius: 3.4, jumper_radius: 1.7}`, cap by P2. The usual
+loser is P2 (61 of 141 failures). IN and OUT in opposite corners, next to
+D1 and D16, didn't help.
 
 The back's port numbers keep their 30 mm offsets, so on this tile they land
 on jumper pads (the mask clips them).

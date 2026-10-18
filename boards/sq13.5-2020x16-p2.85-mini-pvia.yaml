@@ -1,0 +1,21 @@
+# Smallest 4x4 2020 tile: WS2812B-2020 at 2.85mm pitch (courtyards just
+# clear) on a 13.5mm square, the LED pads 0.25mm from the mini edge
+# connector's pads. Mates only with other mini-connector tiles.
+shape: square
+edge: 13.5
+connector: edge_connector_mini
+jumper: jumper_small
+leds:
+  part: ws2812b-2020
+  cols: 4
+  rows: 4
+  pitch: 2.85
+# one 0603 cap, in the corner by P2 the hubs leave free
+caps: {part: c100n-0603, ports: [2], along: [3.2], inset: 1.9}
+# through vias only fit the LED column gaps, so the back's In2 crossings are
+# scarce: of 144 layouts swept only this one came out DRC clean
+hubs: {angle: 180, radius: 3.4, jumper_radius: 1.7}
+router:
+  power_vias: pattern
+# the dense pair's rules (JLC multilayer minimums)
+rules: {track_width: 0.127, clearance: 0.1, hole_copper_clearance: 0.2}

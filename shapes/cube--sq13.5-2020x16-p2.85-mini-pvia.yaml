@@ -1,0 +1,3 @@
+# The small 2020 cube: six 13.5mm mini tiles, 4x4 WS2812B-2020 each, 96 LEDs.
+solid: cube
+boards: {square: sq13.5-2020x16-p2.85-mini-pvia}

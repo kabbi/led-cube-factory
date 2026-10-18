@@ -80,6 +80,10 @@ LED index in the data chain -> position, mm from the board centre (y down, top v
 
 </details>
 
+## Used in
+
+- [cube--sq13-5050x4-p5.5-mini-pvia](../../shapes/cube--sq13-5050x4-p5.5-mini-pvia/README.md)
+
 ## Files
 
 - config: [boards/sq13-5050x4-p5.5-mini-pvia.yaml](../../../boards/sq13-5050x4-p5.5-mini-pvia.yaml)

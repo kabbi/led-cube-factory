@@ -21,9 +21,11 @@ SHAPE_WORD = {"square": "square", "tri": "triangle", "hex": "hexagon"}
 TAG_TEXT = {
     "tpl": "hand-drawn back side from a template",
     "shallow": "shallow edge-connector pads",
-    "mini": "mini edge connector (small tiles)",
+    "micro": "micro edge connector (small tiles)",
     "rot": "outer LEDs turned to clear the edge",
     "flow": "LEDs flipped per row to follow the chain",
+    "grp": "jumpers grouped by port",
+    "nopass": "no PASS hub",
     "pvia": "patterned power vias",
     "fr": "routed with Freerouting",
 }
@@ -137,10 +139,19 @@ def board_page(name, used_in):
     caps = "1 cap" if ncaps == 1 else f"{ncaps} caps"
     caps += (" on " + ", ".join(f"P{k}" for k in cfg["caps"]["ports"]) if "ports" in cfg["caps"]
              else " per edge")
-    back = (f"hand-drawn template `{cfg['template']}`" if cfg.get("template") else
-            "generated: IN/OUT/PASS jumper hubs with {} wings each ({} mm from the hub centre, hubs on a "
-            "{} mm circle), {}".format(len(geometry.ports(cfg["shape"], cfg["edge"])),
-                                       cfg["hubs"]["jumper_radius"], cfg["hubs"]["radius"], caps))
+    if not ncaps or cfg["caps"].get("ports") == []:
+        caps = "no caps"
+    hubs = cfg["hubs"]
+    roles = "/".join(hubs.get("roles", ["IN", "OUT", "PASS"]))
+    if cfg.get("template"):
+        back = f"hand-drawn template `{cfg['template']}`"
+    elif hubs.get("layout") == "grouped":
+        back = (f"generated: {roles} jumpers grouped by port ({hubs['spacing']} mm apart, "
+                f"{hubs['inset']} mm in from the edge), hubs routed as rings, {caps}")
+    else:
+        back = ("generated: {} jumper hubs with {} wings each ({} mm from the hub centre, hubs on a "
+                "{} mm circle), {}".format(roles, len(geometry.ports(cfg["shape"], cfg["edge"])),
+                                           hubs["jumper_radius"], hubs["radius"], caps))
     rows = [
         ("Shape", f"{SHAPE_WORD[cfg['shape']]}, {_mm(cfg['edge'])} edge, "
                   f"{len(geometry.ports(cfg['shape'], cfg['edge']))} ports"),

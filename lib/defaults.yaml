@@ -20,7 +20,7 @@ leds:
 
 connector: edge_connector  # generated boards only; edge_connector_shallow
                            # (lib/parts.yaml) for boards with LEDs near the edge,
-                           # edge_connector_mini for small tiles
+                           # edge_connector_micro for small tiles
 jumper: jumper           # generated boards only; jumper_small for small tiles
 
 caps:                    # generated boards only; templates keep their own caps
@@ -35,6 +35,12 @@ hubs:
   # Omit `at` to auto-place the three hubs on a circle of radius `radius`.
   # angle: 0             # turn the auto layout clockwise, degrees
   # label_offset: [0, 0]  # label position relative to its hub centre
+  # layout: grouped      # instead: the roles' jumpers side by side by each port,
+  # spacing: 1.0         #   this far apart (centres) along the edge,
+  # inset: 1.9           #   centred this far in from it; hub nets route as rings
+  # orient: along        #   lying along the edge, PORT pads mid-pair (default:
+                         #   pointing at the edge)
+  # roles: [IN, OUT]     # hubs to build (default IN, OUT, PASS)
   radius: 7.0             # IN and OUT inner jumpers ~3.2mm apart on a 30mm square
   jumper_radius: 3.225
   IN:   {}

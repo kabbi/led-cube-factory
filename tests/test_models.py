@@ -39,7 +39,9 @@ def test_shape_configs_match_their_solid(name):
     s = config.load_shape(name)                              # name check happens here
     need = {models.KINDS[len(loop)] for loop, _ in models.polyhedron(s["solid"])[1]}
     assert set(s["boards"]) == need, f"{s['solid']} needs boards for {sorted(need)}"
+    edges = set()
     for kind, board in s["boards"].items():
         cfg = config.load_board(board)
         assert kind == cfg["shape"]
-        assert cfg["edge"] == 30.0
+        edges.add(cfg["edge"])
+    assert len(edges) == 1, f"boards of different edge lengths: {sorted(edges)}"

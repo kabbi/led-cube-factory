@@ -1,0 +1,20 @@
+# 2x2 WS2812B 5050 at 5.5mm pitch (courtyards touching) on a 15mm square,
+# with the micro edge connector like the other small tiles. Fits 13mm (the
+# LED bodies 0.3mm from the connector pads); 15mm to match the 4x4 2020.
+shape: square
+edge: 15.0
+connector: edge_connector_micro
+# twelve of the 1.3mm jumpers don't fit the back
+jumper: jumper_small
+leds:
+  part: ws2812b-5050
+  cols: 2
+  rows: 2
+  pitch: 5.5
+# one 0603 cap for four LEDs, in a corner by P2 the hubs leave free
+caps: {part: c100n-0603, ports: [2], along: [3.0], inset: 1.9}
+# turned over (PASS at the bottom): at 13mm the default layout left P4 boxed
+# in by the OUT hub's link to the last LED
+hubs: {angle: 180, radius: 3.0, jumper_radius: 1.6}
+router:
+  power_vias: pattern

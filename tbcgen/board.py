@@ -180,9 +180,13 @@ class BoardBuilder:
                 role = conn["pins"][pad.GetNumber()]
                 pad.SetNet(role_net.get(role) or self.net(f"P{p.index}"))
             # port number beside the port pad, clear of the hub jumper facing it
+            # (grouped jumpers: just inside the pair, between its role letters)
             nx, ny = math.cos(math.radians(p.angle)), math.sin(math.radians(p.angle))
-            self.text(str(p.index), p.x - nx * 2.6 - ny * 2.5, p.y - ny * 2.6 + nx * 2.5,
-                      size=1.0)
+            inset, along = 2.6, 2.5
+            if cfg["hubs"].get("layout") == "grouped":
+                inset, along = cfg["hubs"]["inset"] + cfg["hubs"].get("label_inset", 1.0), 0.0
+            self.text(str(p.index), p.x - nx * inset - ny * along, p.y - ny * inset + nx * along,
+                      size=0.8 if along == 0.0 else 1.0)
 
         # Decoupling caps: VDD pad towards the connector centre
         cap, k = cfg["_cap"], 1
@@ -199,26 +203,44 @@ class BoardBuilder:
                     self.pad(fp, num).SetNet(role_net[role])
                 k += 1
 
-        # Jumper hubs on the back: one jumper per port, pointing at it
+        # Jumpers on the back, one per hub role and port, pointing at the port:
+        # around each hub's centre, or (layout: grouped) side by side by each port
         jp, k = cfg["_jumper"], 1
-        hubs = geo.hub_centres(cfg)
+        hcfg = cfg["hubs"]
+        roles = hcfg.get("roles", ["IN", "OUT", "PASS"])
+        grouped = hcfg.get("layout") == "grouped"
         hub_net = {"IN": "WS_IN", "OUT": "WS_OUT", "PASS": "PASS"}
-        self.hub_pads = {r: [] for r in hub_net}
+        self.hub_pads = {r: [] for r in roles}
         self.port_pads = {p.index: [] for p in self.ports}
-        for role in ("IN", "OUT", "PASS"):
-            for p, x, y in geo.jumper_positions(hubs[role], self.ports,
-                                                cfg["hubs"]["jumper_radius"]):
-                fp = self.footprint(jp["footprint"], f"JP{k}", f"{role}{p.index}", x, y, back=True)
-                fp.SetExcludedFromBOM(True)
-                fp.SetExcludedFromPosFiles(True)
-                self.orient(fp, jp["pins"]["PORT"], jp["pins"]["HUB"], p.angle)
-                pp, hp = self.pad(fp, jp["pins"]["PORT"]), self.pad(fp, jp["pins"]["HUB"])
-                pp.SetNet(self.net(f"P{p.index}"))
-                hp.SetNet(self.net(hub_net[role]))
-                self.port_pads[p.index].append(pp)
-                self.hub_pads[role].append(hp)
-                k += 1
-            lx, ly = cfg["hubs"].get("label_offset", (0, 0))
+        if grouped:
+            spots = [(role, p, x, y, d) for p in self.ports for role, x, y, d in
+                     geo.grouped_jumper_positions(p, roles, hcfg["spacing"], hcfg["inset"])]
+        else:
+            hubs = geo.hub_centres(cfg)
+            spots = [(role, p, x, y, 0) for role in roles for p, x, y in
+                     geo.jumper_positions(hubs[role], self.ports, hcfg["jumper_radius"])]
+        for role, p, x, y, d in spots:
+            fp = self.footprint(jp["footprint"], f"JP{k}", f"{role}{p.index}", x, y, back=True)
+            fp.SetExcludedFromBOM(True)
+            fp.SetExcludedFromPosFiles(True)
+            # orient: along = lying along the edge, PORT pads meeting mid-pair
+            face = p.angle
+            if grouped and hcfg.get("orient") == "along":
+                face += -90 if d > 0 else 90
+            self.orient(fp, jp["pins"]["PORT"], jp["pins"]["HUB"], face)
+            pp, hp = self.pad(fp, jp["pins"]["PORT"]), self.pad(fp, jp["pins"]["HUB"])
+            pp.SetNet(self.net(f"P{p.index}"))
+            hp.SetNet(self.net(hub_net[role]))
+            self.port_pads[p.index].append(pp)
+            self.hub_pads[role].append(hp)
+            k += 1
+            if grouped:
+                # role initial just inside the jumper
+                a = math.radians(p.angle)
+                s = hcfg.get("label_inset", 1.0)
+                self.text(role[0], x - math.cos(a) * s, y - math.sin(a) * s, size=0.8)
+        for role in ([] if grouped else roles):
+            lx, ly = hcfg.get("label_offset", (0, 0))
             fp = self.footprint(jp["labels"][role], f"kibuzzard-{role}", role,
                                 hubs[role][0] + lx, hubs[role][1] + ly, back=True)
             fp.Value().SetVisible(False)
@@ -460,8 +482,10 @@ class BoardBuilder:
                                  self.routable("F.Cu"), label)
         else:
             back = self.routable("B.Cu")
-            for role, extra in (("IN", D(1, "DIN")), ("OUT", D(n, "DOUT")), ("PASS", None)):
-                self.connect(self.hub_pads[role] + ([extra] if extra else []), back, f"hub {role}")
+            extras = {"IN": D(1, "DIN"), "OUT": D(n, "DOUT")}
+            for role, pads in self.hub_pads.items():
+                extra = extras.get(role)
+                self.connect(pads + ([extra] if extra else []), back, f"hub {role}")
             for p in self.ports:
                 conn = self.pad(self.fps[f"J{p.index}"], "3")
                 self.connect([conn] + self.port_pads[p.index], back, f"P{p.index}")

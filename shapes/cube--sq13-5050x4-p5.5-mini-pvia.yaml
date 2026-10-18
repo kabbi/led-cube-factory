@@ -1,3 +1,0 @@
-# The smallest 5050 cube: six 13mm mini tiles, 2x2 WS2812B each, 24 LEDs.
-solid: cube
-boards: {square: sq13-5050x4-p5.5-mini-pvia}

@@ -1,0 +1,19 @@
+# Smallest 1-LED 5050 tile: one WS2812B on an 8mm square (the front alone
+# would fit 7.5mm), no cap, no PASS hub. Jumpers grouped by port: an IN/OUT
+# pair lying along each edge, PORT pads in the middle by the connector's port
+# pad, and the IN and OUT hubs routed as rings (hopping on the front and In2).
+# Mates only with other micro-connector tiles. (One LED: the pitch is nominal.)
+shape: square
+edge: 8.0
+connector: edge_connector_micro
+jumper: jumper_small
+leds:
+  part: ws2812b-5050
+  cols: 1
+  rows: 1
+  pitch: 5.5
+caps: {ports: [], along: []}
+# spacing 1.8-1.9 x inset 1.5-1.6 all route clean; at 7.5-7.75mm the rings don't
+hubs: {layout: grouped, orient: along, roles: [IN, OUT], spacing: 1.85, inset: 1.55}
+router:
+  power_vias: pattern

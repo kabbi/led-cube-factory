@@ -34,9 +34,10 @@ def board_name(cfg):
         <shape><edge>-<package>x<leds>-p<pitch>[-<variation>...]
 
     e.g. tri30-3535x10-p6.2-shallow-rot. Variations, in this order:
-    tpl (hand-drawn back from a template), shallow / mini (shallow or mini
-    edge connector),
-    rot / flow / r<deg> (LED rotation other than one-way auto),
+    tpl (hand-drawn back from a template), shallow / micro
+    (shallow or micro edge connector),
+    rot / flow / r<deg> (LED rotation other than one-way auto), grp (grouped
+    jumpers), nopass (no PASS hub),
     pvia (patterned power vias), fr (Freerouting).
     """
     from . import geometry
@@ -45,12 +46,16 @@ def board_name(cfg):
     tags = []
     if cfg.get("template"):
         tags.append("tpl")
-    conn_tag = {"edge_connector_shallow": "shallow", "edge_connector_mini": "mini"}
+    conn_tag = {"edge_connector_shallow": "shallow", "edge_connector_micro": "micro"}
     if cfg["connector"] in conn_tag:
         tags.append(conn_tag[cfg["connector"]])
     rot = leds.get("rotation", "auto")
     if rot != "auto":
         tags.append({"edge": "rot", "flow": "flow"}.get(rot) or f"r{float(rot):g}")
+    if cfg["hubs"].get("layout") == "grouped":
+        tags.append("grp")
+    if "PASS" not in cfg["hubs"].get("roles", ["PASS"]):
+        tags.append("nopass")
     if cfg["router"].get("power_vias") == "pattern":
         tags.append("pvia")
     if cfg["router"].get("engine", "internal") == "freerouting":

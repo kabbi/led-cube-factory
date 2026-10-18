@@ -104,6 +104,20 @@ def jumper_positions(hub, port_list, radius):
              hy + radius * math.sin(math.radians(p.angle))) for p in port_list]
 
 
+def grouped_jumper_positions(port, roles, spacing, inset):
+    """Grouped hubs: one jumper per hub role beside the port, side by side
+    along the edge (`spacing` apart, clockwise in `roles` order), `inset`
+    from it, pointing at it."""
+    a = math.radians(port.angle)
+    nx, ny = math.cos(a), math.sin(a)          # outward normal
+    tx, ty = -ny, nx                            # along the edge
+    out = []
+    for i, role in enumerate(roles):
+        d = (i - (len(roles) - 1) / 2) * spacing
+        out.append((role, port.x - nx * inset + tx * d, port.y - ny * inset + ty * d, d))
+    return out
+
+
 def cap_positions(port, along, inset):
     a = math.radians(port.angle)
     nx, ny = math.cos(a), math.sin(a)          # outward normal

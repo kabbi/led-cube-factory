@@ -1,0 +1,3 @@
+# The 6-LED cube: six 8mm micro tiles, one WS2812B each, IN/OUT jumpers only.
+solid: cube
+boards: {square: sq8-5050x1-p5.5-micro-grp-nopass-pvia}

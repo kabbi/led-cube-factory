@@ -88,10 +88,11 @@ edge_connector_shallow:
   pins: {"1": GND, "2": VDD, "3": PORT, "4": VDD, "5": GND}
   span: 22.54
 
-# Small tiles: the shallow connector's pinout and depth, pads 1.4mm wide at
-# 2.2mm pitch (10.2mm span). Mates only with itself, not with the 30mm tiles.
-edge_connector_mini:
-  footprint: edge_conn_mini
+# Small tiles: the shallow connector's pinout and depth, pads 0.8mm wide at
+# 1.3mm pitch (6.0mm span), one 0.3mm hole each, solid to the planes. Mates
+# only with itself, not with the 30mm tiles.
+edge_connector_micro:
+  footprint: edge_conn_micro
   value: EdgeConn
   pins: {"1": GND, "2": VDD, "3": PORT, "4": VDD, "5": GND}
-  span: 10.2
+  span: 6.0

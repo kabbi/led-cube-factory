@@ -121,8 +121,9 @@ tri30-3535x10-p6.2-shallow-rot
 ```
 
 Variations, in this order: `tpl` hand-drawn back (template), `shallow` /
-`mini` shallow or mini edge connector, `rot` / `flow` / `r<deg>` LED rotation other than
-one-way auto, `pvia` patterned power vias, `fr` Freerouting. Anything after
+`micro` shallow or micro edge connector, `rot` / `flow` / `r<deg>` LED
+rotation other than one-way auto, `grp` jumpers grouped by port, `nopass`
+no PASS hub, `pvia` patterned power vias, `fr` Freerouting. Anything after
 `--` is a free note for experiments that the scheme doesn't cover.
 
 New LED package: add the footprint to `lib/tbc.pretty`, an entry to
@@ -227,36 +228,54 @@ The generated hex board is 3.5x the square's area, so the router's grid
 is too: `Grid._window` now prepares its shapes before testing grid points
 (~40x faster on board-sized polygons like the data corridors; same result).
 
-### Mini tiles (2x2 5050, 4x4 2020)
+### Small tiles (2x2 5050, 4x4 2020, 1x1 5050)
 
-`sq13-5050x4-p5.5-mini-pvia` is the smallest tile a 2x2 of 5050s fits:
-5.5 mm pitch (courtyards touching), and a 13 mm edge leaves the LED bodies
-0.3 mm from the connector pads. What changed to get there:
+Three small tiles share one connector, `edge_connector_micro`
+(`tbc:edge_conn_micro`): the shallow connector's pinout and depth, pads
+0.8 mm wide at 1.3 mm pitch (6 mm span), one 0.3 mm hole each, connected
+solid to the planes (thermal spokes don't fit the 0.5 mm gaps). It doesn't
+mate with the 30 mm tiles. They also use `jumper: jumper_small`, 1.45 x
+0.8 mm with a 0.25 mm gap (bridge with solder or a 0402 0R): twelve of the
+1.3 mm ones don't fit. `caps.ports` puts caps on some ports only.
 
-- **Connector.** `edge_connector_mini` (`tbc:edge_conn_mini`): the shallow
-  connector's pinout and depth, pads 1.4 mm wide at 2.2 mm pitch (10.2 mm
-  span, ~1.4 mm free at each corner). It doesn't mate with the 30 mm tiles.
-- **Jumpers.** `jumper: jumper_small`, 1.45 x 0.8 mm with a 0.25 mm gap
-  (bridge with solder or a 0402 0R); twelve of the 1.3 mm ones don't fit.
-  Hubs at `jumper_radius: 1.6` on a 3 mm circle, turned over
-  (`angle: 180`): the default layout leaves P4 boxed in.
-- **Caps.** `caps.ports` puts caps on some ports only: one 0603 in the
-  free corner by P2.
+`sq15-5050x4-p5.5-micro-pvia`: 2x2 5050s at 5.5 mm pitch (courtyards
+touching). It fits 13 mm, the LED bodies 0.3 mm from the connector pads
+(built and DRC clean that way with a 10.2 mm-span connector); 15 mm matches
+the 2020 tile. Hubs at `jumper_radius: 1.6` on a 3 mm circle, turned over
+(`angle: 180`: at 13 mm the default layout left P4 boxed in), one 0603 cap
+by P2.
 
-`sq13.5-2020x16-p2.85-mini-pvia` is the same idea for a 4x4 of 2020s:
-2.85 mm pitch (courtyards just clear), 13.5 mm edge, LED pads 0.25 mm from
-the connector pads, the dense pair's rules. The hard part is the back:
-three hubs times four ports need at least two In2 crossings, and a through
-via has to clear the front too, where the 2020 pad rows are 0.32 mm apart,
-so only the LED column gaps take vias (mostly the power vias). Of 144
-layouts swept (hub angle in 45 deg steps x circle 2.6/3.0/3.4 x jumper
-radius 1.5/1.7 x cap spot) three route and one is DRC clean:
-`hubs: {angle: 180, radius: 3.4, jumper_radius: 1.7}`, cap by P2. The usual
-loser is P2 (61 of 141 failures). IN and OUT in opposite corners, next to
-D1 and D16, didn't help.
+`sq15-2020x16-p2.85-micro-pvia`: 4x4 2020s at 2.85 mm pitch (courtyards
+just clear), the dense pair's rules. It fits 13.5 mm, the LED pads 0.25 mm
+from the connector pads; 15 mm matches the 5050 tile. The hard part is the
+back: three hubs times four ports need at least two In2 crossings, and a
+through via has to clear the front too, where the 2020 pad rows are 0.32 mm
+apart, so only the LED column gaps take vias (mostly the power vias).
+Swept 2026-10-18 (hub angle in 45 deg steps x circle x jumper radius x cap
+spot): at 13.5 mm 1 of 144 layouts was DRC clean (P2 the usual loser; IN
+and OUT in opposite corners, next to D1 and D16, didn't help), at 15 mm 5 of
+128; it uses `hubs: {angle: 180, radius: 4.2, jumper_radius: 1.7}`, clean
+with either cap spot tried.
 
-The back's port numbers keep their 30 mm offsets, so on this tile they land
-on jumper pads (the mask clips them).
+`sq8-5050x1-p5.5-micro-grp-nopass-pvia` is the 1-LED end: one 5050 on an
+8 mm square (the front alone would fit 7.5 mm), no cap, no PASS hub.
+
+- **Grouped jumpers.** `hubs: {layout: grouped, roles: [IN, OUT]}`: instead
+  of a cross of jumpers around each hub centre, an IN/OUT pair sits by each
+  port (`orient: along`: lying along the edge, PORT pads in the middle by the
+  connector's port pad), and each hub net routes as a ring, hopping on the
+  front and In2 where the rings cross. Silk: `O <port> I` inside each pair.
+
+Swept 2026-10-18. Hub crosses (three hubs, no cap): 10 of 1176 layouts at
+9-12 mm DRC clean, all at 12 mm; with In2 as cheap as the outer layers (360
+more at 9.5-11.5 mm) none: the crosses box each other in. Grouped, IN/OUT
+only: pointing at the edge, 3 clean at 8 mm and 1 at 7.75 (adjacent ports'
+jumpers meet in the corners below ~7.7 mm); along the edge, 5 clean at 8 mm
+(spacing 1.8-1.9 x inset 1.5-1.6) and none at 7.5-7.75, where the rings find
+no way around the LED, even with In2 cheap.
+
+On the hub-cross tiles the back's port numbers keep their 30 mm offsets, so
+they land on jumper pads (the mask clips them).
 
 ## Panels
 

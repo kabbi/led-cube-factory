@@ -187,6 +187,8 @@ class BoardBuilder:
         # Decoupling caps: VDD pad towards the connector centre
         cap, k = cfg["_cap"], 1
         for p in self.ports:
+            if p.index not in cfg["caps"].get("ports", [p.index]):
+                continue
             for (x, y), d in zip(geo.cap_positions(p, cfg["caps"]["along"], cfg["caps"]["inset"]),
                                  cfg["caps"]["along"]):
                 fp = self.footprint(cap["footprint"], f"C{k}", cap["value"], x, y,

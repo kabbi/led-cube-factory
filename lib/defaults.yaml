@@ -19,12 +19,15 @@ leds:
   chain: raster
 
 connector: edge_connector  # generated boards only; edge_connector_shallow
-                           # (lib/parts.yaml) for boards with LEDs near the edge
+                           # (lib/parts.yaml) for boards with LEDs near the edge,
+                           # edge_connector_mini for small tiles
+jumper: jumper           # generated boards only; jumper_small for small tiles
 
 caps:                    # generated boards only; templates keep their own caps
   part: c100n-0805
   along: [-7.5, 7.5]     # positions along each edge, relative to its middle
   inset: 3.0             # distance from the board edge to the cap centre
+  # ports: [3]           # only on these ports (default: every port)
 
 hubs:
   # Back-side jumper clusters. Each has one jumper per port, placed in the

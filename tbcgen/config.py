@@ -34,7 +34,8 @@ def board_name(cfg):
         <shape><edge>-<package>x<leds>-p<pitch>[-<variation>...]
 
     e.g. tri30-3535x10-p6.2-shallow-rot. Variations, in this order:
-    tpl (hand-drawn back from a template), shallow (shallow edge connector),
+    tpl (hand-drawn back from a template), shallow / mini (shallow or mini
+    edge connector),
     rot / flow / r<deg> (LED rotation other than one-way auto),
     pvia (patterned power vias), fr (Freerouting).
     """
@@ -44,8 +45,9 @@ def board_name(cfg):
     tags = []
     if cfg.get("template"):
         tags.append("tpl")
-    if cfg["connector"] == "edge_connector_shallow":
-        tags.append("shallow")
+    conn_tag = {"edge_connector_shallow": "shallow", "edge_connector_mini": "mini"}
+    if cfg["connector"] in conn_tag:
+        tags.append(conn_tag[cfg["connector"]])
     rot = leds.get("rotation", "auto")
     if rot != "auto":
         tags.append({"edge": "rot", "flow": "flow"}.get(rot) or f"r{float(rot):g}")
@@ -74,7 +76,7 @@ def load_board(path):
     parts = load_parts()
     cfg["_led"] = parts["leds"][cfg["leds"]["part"]]
     cfg["_cap"] = parts["capacitors"][cfg["caps"]["part"]]
-    cfg["_jumper"] = parts["jumper"]
+    cfg["_jumper"] = parts[cfg["jumper"]]
     cfg["_conn"] = parts[cfg["connector"]]
     return cfg
 

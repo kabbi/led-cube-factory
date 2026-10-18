@@ -21,6 +21,7 @@ SHAPE_WORD = {"square": "square", "tri": "triangle", "hex": "hexagon"}
 TAG_TEXT = {
     "tpl": "hand-drawn back side from a template",
     "shallow": "shallow edge-connector pads",
+    "mini": "mini edge connector (small tiles)",
     "rot": "outer LEDs turned to clear the edge",
     "flow": "LEDs flipped per row to follow the chain",
     "pvia": "patterned power vias",
@@ -132,12 +133,14 @@ def board_page(name, used_in):
               "tri": " + ".join(str(k) for k in range(leds.get("rows", 0), 0, -1)),
               "hex": f"{leds.get('rings')} rings"}[cfg["shape"]]
     rot = leds.get("rotation", "auto")
+    ncaps = len(cfg["caps"]["along"])
+    caps = "1 cap" if ncaps == 1 else f"{ncaps} caps"
+    caps += (" on " + ", ".join(f"P{k}" for k in cfg["caps"]["ports"]) if "ports" in cfg["caps"]
+             else " per edge")
     back = (f"hand-drawn template `{cfg['template']}`" if cfg.get("template") else
             "generated: IN/OUT/PASS jumper hubs with {} wings each ({} mm from the hub centre, hubs on a "
-            "{} mm circle), {} per edge".format(len(geometry.ports(cfg["shape"], cfg["edge"])),
-                                        cfg["hubs"]["jumper_radius"], cfg["hubs"]["radius"],
-                                        "1 cap" if len(cfg["caps"]["along"]) == 1 else
-                                        f'{len(cfg["caps"]["along"])} caps'))
+            "{} mm circle), {}".format(len(geometry.ports(cfg["shape"], cfg["edge"])),
+                                       cfg["hubs"]["jumper_radius"], cfg["hubs"]["radius"], caps))
     rows = [
         ("Shape", f"{SHAPE_WORD[cfg['shape']]}, {_mm(cfg['edge'])} edge, "
                   f"{len(geometry.ports(cfg['shape'], cfg['edge']))} ports"),

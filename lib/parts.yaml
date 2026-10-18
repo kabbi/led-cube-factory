@@ -62,6 +62,14 @@ jumper:
   # the square30 template)
   labels: {IN: label_in, OUT: label_out, PASS: label_pass}
 
+# Same contract, a third of the size (1.45 x 0.8mm, 0.25mm gap), for tiles too
+# small for twelve of the 1.3mm ones. Hand-bridge with solder or a 0402 0R.
+jumper_small:
+  footprint: SolderJumper-2_P0.85mm_Open_Pad0.6x0.8mm
+  value: SolderJumper
+  pins: {PORT: "1", HUB: "2"}
+  labels: {IN: label_in, OUT: label_out, PASS: label_pass}
+
 # Tile-to-tile edge connector. Identical on every board -- this is the
 # mechanical/electrical contract between tiles. Pinout is a palindrome so a
 # neighbour mates in either orientation.
@@ -79,3 +87,11 @@ edge_connector_shallow:
   value: EdgeConn
   pins: {"1": GND, "2": VDD, "3": PORT, "4": VDD, "5": GND}
   span: 22.54
+
+# Small tiles: the shallow connector's pinout and depth, pads 1.4mm wide at
+# 2.2mm pitch (10.2mm span). Mates only with itself, not with the 30mm tiles.
+edge_connector_mini:
+  footprint: edge_conn_mini
+  value: EdgeConn
+  pins: {"1": GND, "2": VDD, "3": PORT, "4": VDD, "5": GND}
+  span: 10.2

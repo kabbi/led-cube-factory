@@ -120,8 +120,8 @@ error says what to call it:
 tri30-3535x10-p6.2-shallow-rot
 ```
 
-Variations, in this order: `tpl` hand-drawn back (template), `shallow`
-shallow edge connector, `rot` / `flow` / `r<deg>` LED rotation other than
+Variations, in this order: `tpl` hand-drawn back (template), `shallow` /
+`mini` shallow or mini edge connector, `rot` / `flow` / `r<deg>` LED rotation other than
 one-way auto, `pvia` patterned power vias, `fr` Freerouting. Anything after
 `--` is a free note for experiments that the scheme doesn't cover.
 
@@ -226,6 +226,25 @@ Experiments, 2026-10-16 (generated back, patterned vias):
 The generated hex board is 3.5x the square's area, so the router's grid
 is too: `Grid._window` now prepares its shapes before testing grid points
 (~40x faster on board-sized polygons like the data corridors; same result).
+
+### Mini tile (2x2 5050)
+
+`sq13-5050x4-p5.5-mini-pvia` is the smallest tile a 2x2 of 5050s fits:
+5.5 mm pitch (courtyards touching), and a 13 mm edge leaves the LED bodies
+0.3 mm from the connector pads. What changed to get there:
+
+- **Connector.** `edge_connector_mini` (`tbc:edge_conn_mini`): the shallow
+  connector's pinout and depth, pads 1.4 mm wide at 2.2 mm pitch (10.2 mm
+  span, ~1.4 mm free at each corner). It doesn't mate with the 30 mm tiles.
+- **Jumpers.** `jumper: jumper_small`, 1.45 x 0.8 mm with a 0.25 mm gap
+  (bridge with solder or a 0402 0R); twelve of the 1.3 mm ones don't fit.
+  Hubs at `jumper_radius: 1.6` on a 3 mm circle, turned over
+  (`angle: 180`): the default layout leaves P4 boxed in.
+- **Caps.** `caps.ports` puts caps on some ports only: one 0603 in the
+  free corner by P2.
+
+The back's port numbers keep their 30 mm offsets, so on this tile they land
+on jumper pads (the mask clips them).
 
 ## Panels
 

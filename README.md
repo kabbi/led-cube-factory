@@ -12,7 +12,6 @@ hand-drawn back side -- is shared.
 <a href="docs/shapes/cuboctahedron--sq30-3535x16-p6.2-pvia+tri30-3535x10-p6.2-shallow-rot/README.md"><img src="docs/shapes/cuboctahedron--sq30-3535x16-p6.2-pvia+tri30-3535x10-p6.2-shallow-rot/render.png" width="200" alt="cuboctahedron of square and triangle tiles"></a>
 <a href="docs/shapes/icosahedron--tri30-3535x10-p6.2-shallow-rot/README.md"><img src="docs/shapes/icosahedron--tri30-3535x10-p6.2-shallow-rot/render.png" width="200" alt="icosahedron of triangle tiles"></a>
 <a href="docs/shapes/truncated-octahedron--sq30-2020x64-p3.4-tpl+hex30-2020x169-p3.7-pvia/README.md"><img src="docs/shapes/truncated-octahedron--sq30-2020x64-p3.4-tpl+hex30-2020x169-p3.7-pvia/render.png" width="200" alt="truncated octahedron of 2020 square and hexagon tiles"></a>
-<a href="docs/shapes/cube--sq30-2020x64-p3.4-tpl/README.md"><img src="docs/shapes/cube--sq30-2020x64-p3.4-tpl/render.png" width="200" alt="dense cube of 2020 tiles"></a>
 </p>
 
 <p>

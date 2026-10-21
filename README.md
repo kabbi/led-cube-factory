@@ -4,7 +4,8 @@ Parametric generator for tileable LED PCB tiles (KiCad 10). One YAML file per
 board variant; everything else -- footprints, pinouts, design rules, the
 hand-drawn back side -- is shared.
 
-**[Browse every board and shape in the docs →](docs/README.md)**
+**[Browse every board and shape in the docs →](docs/README.md)** ·
+[What we tried and why: experiments →](experiments/README.md)
 
 <p>
 <a href="docs/shapes/cube--sq30-3535x16-p6.2-pvia/README.md"><img src="docs/shapes/cube--sq30-3535x16-p6.2-pvia/render.png" width="200" alt="cube of 3535 tiles"></a>
@@ -60,6 +61,7 @@ build/<board>/     generated, git-ignored: KiCad project, drc.json, renders/,
                    fab/ (gerbers zip, BOM, CPL), pixelmap.json, 3d/
 build/shapes/      generated demo assemblies (GLB + PNG)
 docs/              generated, committed: a page per board and per shape
+experiments/       one page per experiment: what was tried and the numbers
 releases/<board>-<rev>/   committed snapshots of what was actually ordered
 ```
 
@@ -138,144 +140,27 @@ labels `tbc:label_in/out/pass` in the middle) and auto-routes the back. It's
 the way to prototype new shapes before drawing a template; expect to tune
 `hubs.jumper_radius` (6 ports need ~4.3 mm) and `leds.pitch`.
 
-`tri30-3535x10-p5-shallow-pvia` is the worked example for a small shape: shallow connector pads
-(`connector: edge_connector_shallow`, same positions and pinout, so it mates
-with the squares), one cap per edge (two collide in the corners), and
-three-wing hubs in the corners with `radius - jumper_radius >= 2.4` so the
-inner wings' courtyards clear each other near the centre.
+Knobs the generated back offers, each worked out in an
+[experiment](experiments/README.md):
 
-On a triangle the LED bodies, not the pads, set the pitch: turned all the
-same way, a 3535's corner sticks out towards the slanted edges, and 5.8 mm is
-the most that keeps 0.3 mm to the shallow pads. `rotation: edge` turns each
-outer LED (15 deg steps) flat to its edge, splitting the difference in the
-corners; `tri30-3535x10-p6.2-shallow-rot` gets 6.2 mm with 0.4 mm left (0.6
-mm on the flat ones). Patterned power vias need one rotation, so it uses
-nearest-spot vias.
-
-### Dense 2020 pair (8 LEDs per side)
-
-`tri30-2020x36-p2.95-shallow-pvia` and `sq30-2020x64-p2.95-pvia` share LED,
-pitch and LEDs per side, so the triangle sets the numbers. A 2020's pads
-reach 1.55 mm towards a slanted edge (more than its body), so 8 rows fit up
-to ~2.97 mm pitch with 0.15 mm to the shallow connector pads; 2.95 mm leaves
-0.2 mm. What it took to route:
-
-- **Pad gaps.** Neighbouring LEDs' pads are 0.42 mm apart and DOUT/DIN sit
-  diagonally opposite, so in-row links squeeze between the GND and VDD pads.
-  That needs `rules: {track_width: 0.127, clearance: 0.1}` (JLC multilayer
-  does 0.09/0.09).
-- **Via holes.** Vias keep `hole_copper_clearance` (hole to other copper,
-  default 0.25) even when `clearance` is finer: the router paints them as
-  bigger copper discs. At 0.25 the via grid is too sparse for the chain's row
-  returns; 0.2 (JLC's "via hole to track" minimum) routes. Default boards are
-  unaffected (0.15 clearance + 0.1 annular ring = 0.25 already).
-- **Courtyard.** The 2020 courtyard is pads + 0.15 mm (was + 0.25, wider
-  than the 2.95 mm pitch).
-- **Hubs.** The back jumpers displace patterned vias; on the square
-  `hubs: {angle: 180}` displaces the fewest (125/128 patterned) and lets P4
-  through. Default placement left P4 boxed in.
-
-Experiments, 2026-10-16 (2020, 2.95 mm unless noted, 0.127/0.1 rules):
-
-| board | change | result |
-|---|---|---|
-| tri 8 rows | 0.2/0.15 rules | in-row link boxed in |
-| tri 8 rows | hole-copper 0.25 | row return boxed in (36/72 vias patterned) |
-| tri 8 rows | hole-copper 0.2 | **DRC clean**, 57/72 patterned, ~165 s |
-| tri 8 rows | 0.4/0.2 vias | port P3 fails |
-| sq 8x8 | hole-copper 0.25, any of 4 hub layouts | row return fails |
-| sq 8x8 | hole-copper 0.2, default hubs | P4 fails |
-| sq 8x8 | hole-copper 0.2, hubs angle 90 / 180 / r6.5 / r7.5 | all **DRC clean**, ~360 s |
-| tri 7 rows, 3.4 mm | default rules, hubs r5.5 / r6.5 / r5.0-5.2 / angle 180 | a port or hub boxed in |
-| tri 7 rows, 3.4 mm | default rules, hubs r4.5 (jumper r2.0 / 2.4) | routes, jumper courtyards overlap |
-| tri 7 rows, 3.4 mm | 0.127/0.1, hole-copper 0.25 | P3 fails |
-| tri 7 rows, 3.4 mm | 0.127/0.1, hole-copper 0.2 | **DRC clean**, 54/56 patterned: `tri30-2020x28-p3.4-shallow-pvia` |
-| sq 7x7, 3.4 mm | default rules | row return fails |
-
-### Hexagons
-
-Same 30 mm edge, so a hexagon mates with every other tile (truncated
-octahedron: squares + hexagons; truncated tetrahedron: triangles +
-hexagons). LEDs sit on a hex lattice in `rings` (1, 7, 19, 37, ... 3n(n-1)+1),
-rows parallel to the top and bottom edges. All six sides of the lattice face
-an edge, so towards the four slanted edges a square package reaches 1.37 x
-half its size (the 2020's pads: 1.55 mm). The pitch for a ring count is the
-widest that keeps that clear of the connector pads:
-
-| board | LEDs | pitch | to the pads | why |
-|---|---|---|---|---|
-| `hex30-5050x37-p8-pvia` | 4 rings, 37 | 8.0 mm (max ~8.05) | 0.4 mm | 5 rings need ~6 mm: bodies 0.2 mm apart |
-| `hex30-2020x169-p3.7-pvia` | 8 rings, 169 | 3.7 mm (max ~3.77) | 0.6 mm | same LED density as the 8x8 at 3.4 mm |
-
-The back is the hard part. Each of the six ports has a jumper on all three
-hubs, so port nets and hubs form a K3,6, which needs at least six crossings:
-In2 hops, each needing two via spots free on every layer. The 5050 board
-and the 2020 at 3.7 mm have them; a 2020 field at 3.3-3.4 mm doesn't.
-Hubs: `jumper_radius: 4.3` for six jumpers, `radius: 8` keeps the three
-rings apart.
-
-Experiments, 2026-10-16 (generated back, patterned vias):
-
-| board | change | result |
-|---|---|---|
-| 5050, 4 rings, 8.0 mm | default rules and hubs | **DRC clean**, 62/74 vias patterned, ~135 s |
-| 2020, 9 rings (217), 3.3 mm, shallow | 0.127/0.1, hole-copper 0.2 | P2 boxed in on the back |
-| 2020, 9 rings, 3.3 mm, shallow | same, hubs angle 240 (IN by D1, OUT by the last LED) | P2 boxed in |
-| 2020, 8 rings (169), 3.4 mm | default rules, hubs angle 0 / 240 | P2 / P3 boxed in |
-| 2020, 8 rings, 3.7 mm | default rules or 0.127/0.1, hubs angle 0 or 240 | all four route (~400 s run 4 at once); default rules + hubs: **DRC clean**, 329/338 patterned, ~180 s alone |
-
-The generated hex board is 3.5x the square's area, so the router's grid
-is too: `Grid._window` now prepares its shapes before testing grid points
-(~40x faster on board-sized polygons like the data corridors; same result).
-
-### Small tiles (2x2 5050, 4x4 2020, 1x1 5050)
-
-Three small tiles share one connector, `edge_connector_micro`
-(`tbc:edge_conn_micro`): the shallow connector's pinout and depth, pads
-0.8 mm wide at 1.3 mm pitch (6 mm span), one 0.3 mm hole each, connected
-solid to the planes (thermal spokes don't fit the 0.5 mm gaps). It doesn't
-mate with the 30 mm tiles. They also use `jumper: jumper_small`, 1.45 x
-0.8 mm with a 0.25 mm gap (bridge with solder or a 0402 0R): twelve of the
-1.3 mm ones don't fit. `caps.ports` puts caps on some ports only.
-
-`sq15-5050x4-p7.5-micro-pvia`: 2x2 5050s at 7.5 mm pitch, half the edge,
-so the LED grid stays even across tile edges; the LED bodies keep 0.3 mm to
-the connector pads. At 5.5 mm pitch (courtyards touching) the tile fits
-13 mm (built and DRC clean that way). Hubs at `jumper_radius: 1.6` on a
-3 mm circle, turned over (`angle: 180`: at 13 mm the default layout left P4
-boxed in), one 0603 cap by P2.
-
-`sq15-2020x16-p3.35-micro-pvia`: 4x4 2020s at 3.35 mm pitch, the widest
-that keeps the LED pads 0.26 mm from the connector pads, on default rules.
-The hard part is the back: three hubs times four ports need at least two
-In2 crossings, and a through via has to clear the front too. Swept
-2026-10-18 (hub angle in 45 deg steps x circle x jumper radius x cap spot):
-
-| edge, pitch | rules | DRC clean | why |
-|---|---|---|---|
-| 13.5 mm, 2.85 mm | 0.127/0.1, hole-copper 0.2 | 1 of 144 | pad rows 0.32 mm apart: vias only in the column gaps |
-| 15 mm, 2.85 mm | same | 5 of 128 | |
-| 15 mm, 3.35 mm | default | 5 of 48 | pad rows 0.82 mm apart: vias fit between rows too |
-
-`sq8-5050x1-p5.5-micro-grp-nopass-pvia` is the 1-LED end: one 5050 on an
-8 mm square (the front alone would fit 7.5 mm), no cap, no PASS hub.
-
-- **Grouped jumpers.** `hubs: {layout: grouped, roles: [IN, OUT]}`: instead
-  of a cross of jumpers around each hub centre, an IN/OUT pair sits by each
-  port (`orient: along`: lying along the edge, PORT pads in the middle by the
-  connector's port pad), and each hub net routes as a ring, hopping on the
-  front and In2 where the rings cross. Silk: `O <port> I` inside each pair.
-
-Swept 2026-10-18. Hub crosses (three hubs, no cap): 10 of 1176 layouts at
-9-12 mm DRC clean, all at 12 mm; with In2 as cheap as the outer layers (360
-more at 9.5-11.5 mm) none: the crosses box each other in. Grouped, IN/OUT
-only: pointing at the edge, 3 clean at 8 mm and 1 at 7.75 (adjacent ports'
-jumpers meet in the corners below ~7.7 mm); along the edge, 5 clean at 8 mm
-(spacing 1.8-1.9 x inset 1.5-1.6) and none at 7.5-7.75, where the rings find
-no way around the LED, even with In2 cheap.
-
-On the hub-cross tiles the back's port numbers keep their 30 mm offsets, so
-they land on jumper pads (the mask clips them).
+- **Connector.** `connector: edge_connector_shallow` (`edge_conn_shallow`:
+  pads 0.95 mm deep, two 0.3 mm holes each; same positions and pinout, so it
+  mates with the squares) for triangles; `edge_connector_micro`
+  (`edge_conn_micro`: 0.8 mm pads at 1.3 mm pitch, solid to the planes) for
+  the small tiles, which mate only with each other.
+- **Hubs.** `radius`, `jumper_radius`, `angle` (turns the layout: `180`
+  often frees a boxed-in port), `label_offset`; on triangles keep
+  `radius - jumper_radius >= 2.4`, on hexagons `jumper_radius: 4.3`,
+  `radius: 8`. `layout: grouped` puts an IN/OUT pair by each port instead of
+  a cross per hub (`spacing`, `inset`, `orient: along`); `roles` drops hubs
+  (e.g. no PASS).
+- **Jumpers and caps.** `jumper: jumper_small` (1.45 x 0.8 mm) where the
+  1.3 mm ones don't fit; `caps.ports` puts caps on some ports only.
+- **LEDs.** `rotation: edge` turns each outer LED flat to its edge in 15 deg
+  steps (triangles; costs patterned vias). Hexagons take `leds.rings` (1, 7,
+  19, 37, ...).
+- **Rules.** Dense 2020 boards need `rules: {track_width: 0.127,
+  clearance: 0.1, hole_copper_clearance: 0.2}`, JLC's multilayer minimums.
 
 ## Panels
 
@@ -306,8 +191,7 @@ max_size: [100, 100]   # fail if the panel comes out bigger
 | `sq8-5050x1-p5.5-micro-grp-nopass-pvia-11x6` | 88 x 58 mm | 66; V-cut (12 x 11 fit 100 x 100) |
 
 Hexagons in a grid meet corner to corner side by side, so their tabs are on
-the flat top and bottom edges only (3 joints per column, 18 tabs). A
-honeycomb (columns offset by half a board) saves no area at six boards.
+the flat top and bottom edges only.
 
 The connector pads take the middle 22.5 mm of every edge, so tabs only fit in
 the ~3.7 mm next to each corner (measured per board). Mousebites have to
@@ -322,13 +206,11 @@ uses the finest rules among its boards (each has passed its own DRC).
 ### V-cut panels
 
 Square panels go on `layout: vcut` (preset `jlc-vcut`): boards edge to edge,
-split by V-cuts alone, no tabs, so no nubs to sand off after breaking out, and
-no 2mm gaps. (The 8mm 1x1 tile couldn't be tabbed anyway: 1.0mm of free edge
-by each corner is less than the 1mm mill fillet next to a tab needs.)
-Triangles and hexagons stay on tabs: V-cuts are straight lines only. A V-cut runs across the whole
-panel, so each column is one tile width and each row one tile height (bands);
-mixing 15mm and 8mm tiles leaves scrap (`.`) where their bands cross, which is
-why the 15mm and 8mm tiles have a panel each:
+split by V-cuts alone, no tabs, so no nubs and no 2 mm gaps. Triangles and
+hexagons stay on tabs: V-cuts are straight lines only. A V-cut runs across
+the whole panel, so each column is one tile width and each row one tile
+height (bands); `.` is scrap where bands of different sizes cross. Why, and
+the trade-offs: [V-cut panels vs tabs](experiments/2026-10-21-vcut-panels.md).
 
 ```yaml
 layout: vcut
@@ -356,25 +238,8 @@ nets are restricted to F.Cu (`use_layer`); the template's inner-layer hops
 are swapped for via keep-outs (2.x refuses planes that carry traces) and
 restored exactly after the SES import, along with the rest of the template.
 Data-chain links it leaves open are finished by the in-house router.
-
-Experiments, 2026-10-16:
-
-| board | engine | result |
-|---|---|---|
-| sq30-5050x16-p7.112, template | internal | DRC clean, 223 mm front track, 38 vias |
-| sq30-5050x16-p7.112, template | Freerouting 1.5 | DRC clean after 1 link finished in-house; 265 mm, 35 vias |
-| sq30-2020x64-p3.4, template | internal | DRC clean |
-| sq30-2020x64-p3.4, template | Freerouting 1.5 | 6 links open, one boxed in: fails |
-| sq30-5050x16-p7.112, template | Freerouting 2.5 | 13 power pads never reach a plane: fails |
-| sq30-5050x16-p7.112, generated | internal | DRC clean, 209 mm front + 178 mm back, 47 vias, 31 s |
-| sq30-5050x16-p7.112, generated | Freerouting 2.5 | 6 unconnected (power, port nets); 393 mm front track |
-| sq30-2020x64-p3.4, generated | internal | fails (P4 has no path through 128 power vias) |
-| sq30-2020x64-p3.4, generated | Freerouting 2.5 | 15 unrouted, finish step can't close D48->D49: fails |
-
-Takeaways: on these boards the constraint is the data chain fencing the
-front, which needs short In2 hops; Freerouting can't use In2 (KiCad exports
-it as a plane) and 2.5 additionally struggles to fan power pads into planes.
-The dense 8x8 only works with the hand-drawn dense template.
+It never beat the in-house router on these boards:
+[Freerouting vs the in-house router](experiments/2026-10-16-freerouting.md).
 
 ## Power-via placement
 
@@ -386,24 +251,10 @@ already on the board (template back copper, pads, edge, holes) and repeats it
 on every LED; misfits get the nearest spot outside the corridors. On the 2020
 it chooses both vias under the LED body, between the pad columns.
 
-Experiments, 2026-10-16:
-
-| board | vias | result | front track | F.Cu segments | time |
-|---|---|---|---|---|---|
-| sq30-5050x16-p7.112, template | nearest | DRC clean | 222 mm | 142 | ~55 s |
-| sq30-5050x16-p7.112, template | pattern | DRC clean (26/32 vias by pattern) | 241 mm | 111 | ~94 s |
-| sq30-2020x64-p3.4, template | nearest | DRC clean | 439 mm | 556 | ~52 s |
-| sq30-2020x64-p3.4, template | pattern | DRC clean (104/128 by pattern) | 452 mm | 438 | ~270 s |
-| sq30-2020x64-p3.4, generated back | nearest | fails (P4 can't cross the back) | -- | -- | -- |
-| sq30-2020x64-p3.4, generated back | pattern | **DRC clean**, 2.9 mm on In2 | 428 mm | 397 | ~260 s |
-
-Patterned vias line up in columns on the back, which leaves channels for
-the port/hub routing: the only way the dense board routes without a
-hand-drawn template. On template boards the gain is mostly tidiness.
-
-Pitfall seen while testing: routing the chain ends before the data chain
-let a WS_OUT hop on In2 cut a +5V island off the plane (DRC: unconnected).
-In2 hops are cheap but must not enclose plane areas.
+Patterned vias line up in columns on the back, leaving channels for the
+port/hub routing; that's what lets dense boards route without a hand-drawn
+template ([numbers](experiments/2026-10-16-power-via-placement.md)). In2
+hops are cheap but must not enclose plane areas.
 
 ## 3D models (demo / docs)
 
@@ -472,7 +323,9 @@ make all model shapes docs
 ## Known limits
 
 - The router is a simple grid A* without rip-up: dense boards depend on
-  route order; it fails loudly rather than producing a bad board.
+  route order; it fails loudly rather than producing a bad board. It isn't
+  repeatable run to run (set iteration order), so a rebuild can shift via
+  counts and rewrite the docs numbers.
 - Front routing is functional rather than pretty, especially the row return
   traces on 8x8.
 - JLC CPL rotations come straight from KiCad (`jlc_rotation` per part to

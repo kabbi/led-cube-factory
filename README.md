@@ -285,7 +285,7 @@ per-board designators `D1_3`, and a DRC report):
 
 ```yaml
 preset: jlc-rails      # panels/jlc-rails.json: 5mm rails, tooling, fiducials, mousebite style
-layout: tri            # grid | tri (rows alternating apex up/down, nested)
+layout: tri            # grid | tri (rows alternating apex up/down, nested) | vcut
 board: tri30-3535x10-p6.2-shallow-rot
 rows: 2
 cols: 5
@@ -296,12 +296,14 @@ max_size: [100, 100]   # fail if the panel comes out bigger
 
 | panel | size | boards |
 |---|---|---|
-| `sq30-2020x64-p3.4-tpl-3x2` | 94 x 76 mm | 6 |
-| `sq30-3535x16-p6.2-pvia-3x2` | 94 x 76 mm | 6 |
+| `sq30-2020x64-p3.4-tpl-3x2` | 90 x 70 mm | 6; V-cut (3x3 fits 100 x 100) |
+| `sq30-3535x16-p6.2-pvia-3x2` | 90 x 70 mm | 6; V-cut (3x3 fits 100 x 100) |
 | `tri30-3535x10-p6.2-shallow-rot-2x5` | 99.2 x 68.0 mm | 10 (3 rows, 15, still fit 100 x 100) |
 | `tri30-mix-4` | 81.9 x 40.0 mm | one of each triangle |
 | `hex30-5050x37-p8-pvia-3x2` | 184.0 x 119.9 mm | 6 |
 | `hex30-2020x169-p3.7-pvia-3x2` | 184.0 x 119.9 mm | 6 |
+| `sq15-micro-mix-24` | 90 x 70 mm | 12 x 2x2 5050, 12 x 4x4 2020; V-cut (6 x 6 fit 100 x 100) |
+| `sq8-5050x1-p5.5-micro-grp-nopass-pvia-11x6` | 88 x 58 mm | 66; V-cut (12 x 11 fit 100 x 100) |
 
 Hexagons in a grid meet corner to corner side by side, so their tabs are on
 the flat top and bottom edges only (3 joints per column, 18 tabs). A
@@ -316,6 +318,33 @@ planned: any joint that would reach copper fails the build. Holes sit just
 outside the board edge (`offset: -0.25mm`), clear of the inner planes, so
 expect small nubs near the corners after breaking out. A mixed panel's DRC
 uses the finest rules among its boards (each has passed its own DRC).
+
+### V-cut panels
+
+Square panels go on `layout: vcut` (preset `jlc-vcut`): boards edge to edge,
+split by V-cuts alone, no tabs, so no nubs to sand off after breaking out, and
+no 2mm gaps. (The 8mm 1x1 tile couldn't be tabbed anyway: 1.0mm of free edge
+by each corner is less than the 1mm mill fillet next to a tab needs.)
+Triangles and hexagons stay on tabs: V-cuts are straight lines only. A V-cut runs across the whole
+panel, so each column is one tile width and each row one tile height (bands);
+mixing 15mm and 8mm tiles leaves scrap (`.`) where their bands cross, which is
+why the 15mm and 8mm tiles have a panel each:
+
+```yaml
+layout: vcut
+legend: {A: sq15-5050x4-p7.5-micro-pvia, c: sq8-5050x1-p5.5-micro-grp-nopass-pvia}
+boards:
+  - A A . .
+  - . . c c
+```
+
+The cuts go on every band boundary and against the rails, on Cmts.User
+(KiKit's JLC export sends that layer as `V-CUT`). The edge pads sit 0.115mm
+from the cut, against JLC's usual 0.4mm for copper by a V-cut, so the score
+skims the pads' outer edge, and JLC may query the order. Where the mask
+openings of facing pads merge across a cut (the dense template's do), panel
+DRC waives the solder mask bridge: it pairs two boards' nets and sits on the
+cut line. Waivers are listed as `waived:<type>` in the panel output.
 
 ## Router engines
 

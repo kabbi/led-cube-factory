@@ -9,10 +9,15 @@ Layouts (all boards are placed by their bounding-box centre):
   grid  rows x cols, boards upright.
   tri   rows of triangles alternating apex up / apex down, slanted edges
         facing at `space`; odd rows mirrored so flat edges face flat edges.
+  vcut  squares edge to edge, held and split by V-cuts alone. Each column
+        is as wide and each row as tall as its tiles (a band); a `.` cell
+        is solid scrap. V-cuts run the whole panel, so they go on every band
+        boundary and against the rails/frame.
 
-Tabs go only where two edges face each other at `space` (or an edge faces
-the rails/frame), one near each end of the edge, inside the copper-free
-stretch next to the corner that every tile has (measured per board).
+Tabs (grid, tri) go only where two edges face each other at `space` (or an
+edge faces the rails/frame), one near each end of the edge, inside the
+copper-free stretch next to the corner that every tile has (measured per
+board).
 """
 import math
 
@@ -43,11 +48,24 @@ def load_panel(name):
     spec["name"] = name
     if "boards" not in spec:
         spec["boards"] = [[spec["board"]] * spec["cols"] for _ in range(spec["rows"])]
+    if "legend" in spec:
+        # rows spelled as strings of legend keys, `.` for scrap (None)
+        legend = {**spec["legend"], ".": None}
+        spec["boards"] = [[legend[k] for k in row.split()] for row in spec["boards"]]
     spec.setdefault("layout", "grid")
-    spec.setdefault("space", 2.0)
+    spec.setdefault("space", 0.0 if spec["layout"] == "vcut" else 2.0)
+    if spec["layout"] == "vcut" and spec["space"]:
+        raise ValueError(f"{name}: layout vcut puts the boards edge to edge, drop `space`")
+    if spec["layout"] != "vcut" and any(b is None for row in spec["boards"] for b in row):
+        raise ValueError(f"{name}: scrap cells only go in layout vcut")
     spec.setdefault("tabs", {})
     spec["tabs"].setdefault("width", 2.0)
     return spec
+
+
+def panel_boards(spec):
+    """Every board slot, row by row, scrap left out."""
+    return [b for row in spec["boards"] for b in row if b is not None]
 
 
 # -- layout (pure geometry, mm, KiCad orientation: y down) ----------------------
@@ -91,9 +109,64 @@ def placements(spec, cfgs):
             for k, b in enumerate(row):
                 up = (r + k) % 2 == 0           # tiles are apex up as drawn
                 out.append((b, edge / 2 + k * step, r * (h + s) + h / 2, 0.0 if up else 180.0))
+    elif spec["layout"] == "vcut":
+        xs, ys = bands(spec, cfgs)
+        for r, row in enumerate(rows):
+            for c, b in enumerate(row):
+                if b is not None:
+                    out.append((b, (xs[c] + xs[c + 1]) / 2, (ys[r] + ys[r + 1]) / 2, 0.0))
     else:
         raise ValueError(f"{spec['name']}: unknown layout {spec['layout']!r}")
     return out
+
+
+def bands(spec, cfgs):
+    """Layout vcut: the column and row boundaries, mm from the top left.
+    Every board in a column has its width, every board in a row its height."""
+    rows = spec["boards"]
+    if len({len(row) for row in rows}) != 1:
+        raise ValueError(f"{spec['name']}: rows of different lengths")
+
+    def size(b):
+        if cfgs[b]["shape"] != "square":
+            raise ValueError(f"{spec['name']}: V-cuts are straight, {b} isn't a square")
+        x0, y0, x1, y1 = bbox(tile_outline(cfgs[b]))
+        return x1 - x0, y1 - y0
+
+    def band(cells, k, what):
+        got = {round(s, 6) for s in cells}
+        if not got:
+            raise ValueError(f"{spec['name']}: {what} {k} is all scrap")
+        if len(got) != 1:
+            raise ValueError(f"{spec['name']}: {what} {k} mixes sizes {sorted(got)}, "
+                             "nothing to put a V-cut between")
+        return got.pop()
+
+    widths = [band([size(row[c])[0] for row in rows if row[c] is not None], c, "column")
+              for c in range(len(rows[0]))]
+    heights = [band([size(b)[1] for b in row if b is not None], r, "row")
+               for r, row in enumerate(rows)]
+    xs, ys = [0.0], [0.0]
+    for w in widths:
+        xs.append(xs[-1] + w)
+    for h in heights:
+        ys.append(ys[-1] + h)
+    return xs, ys
+
+
+def scrap(spec, cfgs):
+    """Layout vcut: the scrap cells as (x0, y0, x1, y1), mm."""
+    xs, ys = bands(spec, cfgs)
+    return [(xs[c], ys[r], xs[c + 1], ys[r + 1])
+            for r, row in enumerate(spec["boards"]) for c, b in enumerate(row) if b is None]
+
+
+def vcut_lines(spec, cfgs, frame):
+    """Layout vcut: ([x of vertical cuts], [y of horizontal cuts]), mm: every
+    band boundary, and the outer ones where a rail/frame side is."""
+    xs, ys = bands(spec, cfgs)
+    return (xs[1:-1] + [xs[0]] * ("left" in frame) + [xs[-1]] * ("right" in frame),
+            ys[1:-1] + [ys[0]] * ("top" in frame) + [ys[-1]] * ("bottom" in frame))
 
 
 # -- tabs -----------------------------------------------------------------------
@@ -396,20 +469,21 @@ def build(spec):
     from kikit import panelize_ui_impl as ki
     from kikit.panelize import Origin, Panel
     from shapely.affinity import scale
-    from shapely.geometry import Polygon
+    from shapely.geometry import LineString, Polygon, box
 
     name = spec["name"]
     out = OUT / name
     out.mkdir(parents=True, exist_ok=True)
     pp = out / f"{name}.kicad_pcb"
 
+    vcut = spec["layout"] == "vcut"
     cfgs, pcbs = {}, {}
-    for b in {b for row in spec["boards"] for b in row}:
+    for b in set(panel_boards(spec)):
         cfgs[b] = config.load_board(b)
         pcbs[b] = config.BUILD / b / f"{b}.kicad_pcb"
         if not pcbs[b].exists():
             raise RuntimeError(f"{b} isn't built yet: make all BOARDS={b}")
-    free = {b: edge_free(cfgs[b], pcbs[b]) for b in cfgs}
+    free = {} if vcut else {b: edge_free(cfgs[b], pcbs[b]) for b in cfgs}
 
     preset = ki.obtainPreset([str(PANELS / f"{spec['preset']}.json")])
     mm = pcbnew.FromMM
@@ -418,23 +492,36 @@ def build(spec):
     framing["hspace"] = framing["vspace"] = mm(space)
     preset["text"]["text"] = preset["text"]["text"].replace("{panel}", name)
     cuts_p = preset["cuts"]
-    if cuts_p["prolong"]:
+    if cuts_p["type"] != ("vcuts" if vcut else "mousebites"):
+        raise RuntimeError(f"{spec['preset']}: cuts must be {'vcuts' if vcut else 'mousebites'} "
+                           f"for layout {spec['layout']}")
+    if not vcut and cuts_p["prolong"]:
         raise RuntimeError(f"{spec['preset']}: set cuts.prolong to 0, the cut lines "
                            "already cover the mill fillets")
     mill = preset["post"]["millradius"] / 1e6
 
     slots = placements(spec, cfgs)
     polys = [tile_outline(cfgs[b], x, y, a) for b, x, y, a in slots]
-    x0, y0, x1, y1 = bbox([p for poly in polys for p in poly])
+    if vcut:
+        xs, ys = bands(spec, cfgs)
+        x0, y0, x1, y1 = xs[0], ys[0], xs[-1], ys[-1]
+    else:
+        x0, y0, x1, y1 = bbox([p for poly in polys for p in poly])
     ftype = framing["type"]
     frame = {}
     if ftype in ("railstb", "frame"):
         frame.update(top=y0 - space, bottom=y1 + space)
     if ftype in ("railslr", "frame"):
         frame.update(left=x0 - space, right=x1 + space)
-    tabs = place_tabs(polys, [free[b] for b, *_ in slots], space, frame,
-                      spec["tabs"]["width"], mill, cuts_p["drill"] / 1e6)
-    check_tabs(polys, tabs)
+    if vcut:
+        tabs = []
+        vxs, vys = vcut_lines(spec, cfgs, frame)
+        held = f"{len(vxs) + len(vys)} V-cuts"
+    else:
+        tabs = place_tabs(polys, [free[b] for b, *_ in slots], space, frame,
+                          spec["tabs"]["width"], mill, cuts_p["drill"] / 1e6)
+        check_tabs(polys, tabs)
+        held = f"{len(tabs)} tabs"
 
     rules_from = finest_rules(pcbs)
     first = pcbnew.LoadBoard(str(pcbs[slots[0][0]]))
@@ -456,6 +543,9 @@ def build(spec):
 
     for poly, _ in tabs:
         panel.appendSubstrate(Polygon([(mm(x), mm(y)) for x, y in poly]))
+    if vcut:
+        for c0, r0, c1, r1 in scrap(spec, cfgs):
+            panel.appendSubstrate(box(mm(c0), mm(r0), mm(c1), mm(r1)))
 
     frame_cuts = ki.buildFraming(preset, panel)
     ki.buildTooling(preset, panel)
@@ -463,18 +553,21 @@ def build(spec):
     for section in ["text", "text2", "text3", "text4"]:
         ki.buildText(preset[section], panel)
     ki.buildPostprocessing(preset["post"], panel)
-    milled = scale(panel.boardSubstrate.substrates, 1e-6, 1e-6, origin=(0, 0))
-    if cuts_p["type"] != "mousebites":
-        raise RuntimeError(f"{spec['preset']}: cuts must be mousebites")
-    drill, spacing, offset = (cuts_p[k] / 1e6 for k in ("drill", "spacing", "offset"))
-    cuts = joint_cuts(polys, milled, [free[b] for b, *_ in slots], drill)
-    for k, (_, seg) in enumerate(cuts):
-        # not panel.makeMouseBites: it drops holes whose centre misses
-        # material, i.e. the end ones on thin fillets -- exactly where a
-        # joint still needs perforating
-        for m, (x, y) in enumerate(mousebites(seg, drill, spacing, offset)):
-            panel.addNPTHole(pcbnew.VECTOR2I(mm(x), mm(y)), mm(drill),
-                             ref=f"MB_{k + 1}_{m + 1}", excludedFromPos=True)
+    if vcut:
+        # KiKit spans each line across the whole panel (rails included)
+        frame_cuts += [LineString([(mm(x), mm(y0)), (mm(x), mm(y1))]) for x in vxs]
+        frame_cuts += [LineString([(mm(x0), mm(y)), (mm(x1), mm(y))]) for y in vys]
+    else:
+        milled = scale(panel.boardSubstrate.substrates, 1e-6, 1e-6, origin=(0, 0))
+        drill, spacing, offset = (cuts_p[k] / 1e6 for k in ("drill", "spacing", "offset"))
+        cuts = joint_cuts(polys, milled, [free[b] for b, *_ in slots], drill)
+        for k, (_, seg) in enumerate(cuts):
+            # not panel.makeMouseBites: it drops holes whose centre misses
+            # material, i.e. the end ones on thin fillets -- exactly where a
+            # joint still needs perforating
+            for m, (x, y) in enumerate(mousebites(seg, drill, spacing, offset)):
+                panel.addNPTHole(pcbnew.VECTOR2I(mm(x), mm(y)), mm(drill),
+                                 ref=f"MB_{k + 1}_{m + 1}", excludedFromPos=True)
     ki.makeOtherCuts(preset, panel, frame_cuts)
     ki.setStackup(preset["source"], panel)
     ki.setPageSize(preset["page"], panel, first)
@@ -491,4 +584,4 @@ def build(spec):
     if limit and (size[0] > limit[0] + 1e-6 or size[1] > limit[1] + 1e-6):
         raise RuntimeError(f"{name}: panel is {size[0]:.2f} x {size[1]:.2f} mm, "
                            f"over max_size {limit[0]} x {limit[1]}")
-    return pp, cfgs, size, len(tabs)
+    return pp, cfgs, size, held

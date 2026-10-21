@@ -1,8 +1,10 @@
-# 3x2 of the dense 2020 square on 5mm rails top and bottom.
-preset: jlc-rails
-layout: grid
+# 3x2 of the dense 2020 square on 5mm rails top and bottom, edge to edge on V-cuts
+# (no tabs, no nubs to sand off). The cuts pass 0.115mm from the edge pads
+# (JLC's rule is 0.4mm copper to a V-cut), so the score skims the pads'
+# outer edge. (3x3 fits 100 x 100 too.)
+preset: jlc-vcut
+layout: vcut
 board: sq30-2020x64-p3.4-tpl
 rows: 2
 cols: 3
-space: 2.0
 max_size: [100, 100]

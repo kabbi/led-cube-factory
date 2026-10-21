@@ -4,6 +4,7 @@ import collections
 import csv
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -73,10 +74,11 @@ def write_project(cfg, out):
 
 # -- checks -------------------------------------------------------------------
 
-def drc(pcb, out, refill=True):
+def drc(pcb, out, refill=True, waive=None):
     """refill: fill zones with the project's rules and save them -- the fill
     pcbnew does while building doesn't see the custom edge clearance, and the
-    gerbers are plotted from the saved fill."""
+    gerbers are plotted from the saved fill. waive(violation) -> True keeps a
+    violation out of the counts (still in drc.json, tallied as waived:<type>)."""
     report = out / "drc.json"
     run([KICAD_CLI, "pcb", "drc", "--format", "json", "--severity-all",
          *(["--refill-zones", "--save-board"] if refill else []), "-o", report, pcb])
@@ -84,6 +86,9 @@ def drc(pcb, out, refill=True):
     sev = collections.Counter()
     kinds = collections.Counter()
     for v in d.get("violations", []):
+        if waive and waive(v):
+            kinds[("waived", v["type"])] += 1
+            continue
         sev[v["severity"]] += 1
         kinds[(v["severity"], v["type"])] += 1
     unconnected = len(d.get("unconnected_items", []))
@@ -167,7 +172,7 @@ def panel(spec):
     and a DRC report (zones as the boards filled them; not refilled, since
     the tabs join the outlines and a refill would pour into them)."""
     from . import panel as pnl
-    pp, cfgs, size, ntabs = pnl.build(spec)
+    pp, cfgs, size, held = pnl.build(spec)
     pd = pp.parent
     run([KICAD_CLI, "pcb", "render", "--side", "top", "-w", "1600", "-h", "1600",
          "--quality", "basic", "-o", pd / "panel.png", pp])
@@ -179,7 +184,16 @@ def panel(spec):
     rot_fix = {p["value"]: p.get("jlc_rotation", 0)
                for cfg in cfgs.values() for p in [cfg["_led"], cfg["_cap"]]}
     write_bom_cpl(pp, fd, spec["name"], rot_fix)
-    return pp, size, ntabs, drc(pp, pd, refill=False)
+    return pp, size, held, drc(pp, pd, refill=False, waive=_across_boards)
+
+
+def _across_boards(v):
+    """A mask opening bridging two boards' pads: on a V-cut panel facing edge
+    pads merge across the cut line, which the cut removes. Nets on a panel
+    are Board_<n>-<net>."""
+    boards = {m.group(1) for i in v["items"]
+              for m in [re.search(r"\[Board_(\d+)-", i["description"])] if m}
+    return v["type"] == "solder_mask_bridge" and len(boards) > 1
 
 
 def write_pixelmap(pixelmap, out):

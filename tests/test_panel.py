@@ -10,7 +10,7 @@ FREE = 3.73     # copper-free run next to every corner, as measured on the tiles
 
 def layout(name):
     spec = pnl.load_panel(name)
-    cfgs = {b: config.load_board(b) for row in spec["boards"] for b in row}
+    cfgs = {b: config.load_board(b) for b in pnl.panel_boards(spec)}
     slots = pnl.placements(spec, cfgs)
     polys = [pnl.tile_outline(cfgs[b], x, y, a) for b, x, y, a in slots]
     return spec, polys
@@ -24,9 +24,8 @@ def frame_of(polys, space):
 @pytest.mark.parametrize("name", pnl.all_panels())
 def test_panel_specs_name_real_boards(name):
     spec = pnl.load_panel(name)
-    for row in spec["boards"]:
-        for b in row:
-            assert (config.BOARDS / f"{b}.yaml").exists(), b
+    for b in pnl.panel_boards(spec):
+        assert (config.BOARDS / f"{b}.yaml").exists(), b
 
 
 @pytest.mark.parametrize("name", pnl.all_panels())
@@ -58,7 +57,7 @@ def test_triangles_nest_edge_to_edge():
 
 
 @pytest.mark.parametrize("name,count", [
-    ("sq30-3535x16-p6.2-pvia-3x2", 2 * 4 + 2 * 3 + 2 * 6),       # sides, rows, rails
+    ("hex30-5050x37-p8-pvia-3x2", 2 * 3 + 2 * 6),               # rows, rails
     ("tri30-3535x10-p6.2-shallow-rot-2x5", 2 * 8 + 2 * 3 + 2 * 4),
     ("tri30-mix-4", 2 * 3 + 2 * 4),
 ])
@@ -70,7 +69,10 @@ def test_tabs_at_both_ends_of_every_facing_edge(name, count):
     assert len(tabs) == count
 
 
-@pytest.mark.parametrize("name", pnl.all_panels())
+TABBED = [n for n in pnl.all_panels() if pnl.load_panel(n)["layout"] != "vcut"]
+
+
+@pytest.mark.parametrize("name", TABBED)
 def test_tabs_stay_off_the_connector(name):
     """Where a tab meets a board, it's within the copper-free run by a
     corner, short of the first copper by a hole radius and margin plus the
@@ -129,3 +131,50 @@ def test_joint_into_copper_is_refused():
     sub = unary_union([Polygon(tri), box(-3, y - 0.01, 3, y + 2)])    # mid-edge tab
     with pytest.raises(ValueError, match="reaches copper"):
         pnl.joint_cuts([tri], sub, [FREE], 0.5)
+
+
+@pytest.mark.parametrize("name,xs,ys", [
+    ("sq30-3535x16-p6.2-pvia-3x2", [0, 30, 60, 90], [0, 30, 60]),
+    ("sq30-2020x64-p3.4-tpl-3x2", [0, 30, 60, 90], [0, 30, 60]),
+    ("sq15-micro-mix-24", [15 * k for k in range(7)], [15 * k for k in range(5)]),
+    ("sq8-5050x1-p5.5-micro-grp-nopass-pvia-11x6", [8 * k for k in range(12)],
+     [8 * k for k in range(7)]),
+])
+def test_vcuts_split_every_board_and_cross_none(name, xs, ys):
+    from shapely.geometry import LineString, Polygon, box
+    spec, polys = layout(name)
+    cfgs = {b: config.load_board(b) for b in pnl.panel_boards(spec)}
+    assert pnl.bands(spec, cfgs) == (pytest.approx(xs), pytest.approx(ys))
+    w, h = xs[-1], ys[-1]
+    vx, vy = pnl.vcut_lines(spec, cfgs, {"top": 0, "bottom": 0})
+    assert len(vx) == len(xs) - 2 and len(vy) == len(ys)    # interior + both rails
+    lines = [LineString([(x, -1), (x, h + 1)]) for x in vx] + \
+        [LineString([(-1, y), (w + 1, y)]) for y in vy]
+    shapes = [Polygon(p) for p in polys]
+    for s in shapes:
+        assert not any(s.buffer(-0.01).intersects(ln) for ln in lines)
+        # each side on a cut, or on the panel's left/right edge
+        left = LineString(list(s.exterior.coords))
+        for c in [ln.buffer(1e-6) for ln in lines] + [box(-1, -1, 0, h + 1),
+                                                      box(w, -1, w + 1, h + 1)]:
+            left = left.difference(c)
+        assert left.length < 1e-3
+    # boards and scrap tile the whole block
+    cells = [box(*c) for c in pnl.scrap(spec, cfgs)]
+    assert sum(c.area for c in cells + shapes) == pytest.approx(w * h)
+
+
+def test_vcut_scrap_cells_fill_the_bands():
+    spec = {"name": "t", "layout": "vcut", "boards": [
+        ["sq15-5050x4-p7.5-micro-pvia", None],
+        [None, "sq8-5050x1-p5.5-micro-grp-nopass-pvia"]]}
+    cfgs = {b: config.load_board(b) for b in pnl.panel_boards(spec)}
+    assert pnl.scrap(spec, cfgs) == [(15, 0, 23, 15), (0, 15, 15, 23)]
+
+
+def test_vcut_bands_refuse_mixed_sizes():
+    spec = {"name": "t", "layout": "vcut", "boards": [
+        ["sq15-5050x4-p7.5-micro-pvia"], ["sq8-5050x1-p5.5-micro-grp-nopass-pvia"]]}
+    cfgs = {b: config.load_board(b) for b in pnl.panel_boards(spec)}
+    with pytest.raises(ValueError, match="column 0 mixes sizes"):
+        pnl.bands(spec, cfgs)

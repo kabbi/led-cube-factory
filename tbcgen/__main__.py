@@ -60,9 +60,9 @@ def cmd_panel(a):
         spec = panel.load_panel(name)
         print(f"[panel {name}]", flush=True)
         t0 = time.time()
-        pp, size, ntabs, res = outputs.panel(spec)
-        n = sum(len(row) for row in spec["boards"])
-        print(f"  {pp}\n  {size[0]:.2f} x {size[1]:.2f} mm, {n} boards, {ntabs} tabs")
+        pp, size, held, res = outputs.panel(spec)
+        n = len(panel.panel_boards(spec))
+        print(f"  {pp}\n  {size[0]:.2f} x {size[1]:.2f} mm, {n} boards, {held}")
         print(f"  DRC: {res['errors']} errors, {res['warnings']} warnings, "
               f"{res['unconnected']} unconnected")
         for k, c in res["by_type"].items():

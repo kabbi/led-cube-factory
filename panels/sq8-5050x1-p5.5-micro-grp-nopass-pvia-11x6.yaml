@@ -1,0 +1,11 @@
+# 11 x 6 of the 8mm 1x1 5050 tile, edge to edge on V-cuts: its pads leave
+# 1mm of edge by each corner, too little for a tab and its mill fillet (and
+# V-cuts leave no nubs to sand off). (12 x 11 is the most that fits 100 x 100
+# with the rails.) The cuts pass 0.115mm from the edge pads (JLC's rule is 0.4mm copper
+# to a V-cut), so the score skims the pads' outer edge.
+preset: jlc-vcut
+layout: vcut
+board: sq8-5050x1-p5.5-micro-grp-nopass-pvia
+rows: 6
+cols: 11
+max_size: [100, 100]

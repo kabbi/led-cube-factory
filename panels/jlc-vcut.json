@@ -1,0 +1,8 @@
+{
+  "framing": {"type": "railstb", "width": "5mm"},
+  "cuts": {"type": "vcuts", "layer": "Cmts.User"},
+  "tooling": {"type": "3hole", "hoffset": "2.5mm", "voffset": "2.5mm", "size": "1.152mm"},
+  "fiducials": {"type": "3fid", "hoffset": "6mm", "voffset": "2.5mm", "coppersize": "1mm", "opening": "2mm"},
+  "text": {"type": "simple", "text": "{panel} JLCJLCJLCJLC", "anchor": "mt", "voffset": "2.5mm",
+           "hjustify": "center", "vjustify": "center", "width": "1.2mm", "height": "1.2mm", "thickness": "0.2mm"}
+}

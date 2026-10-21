@@ -1,0 +1,16 @@
+# The two 15mm micro-connector tiles, 12 each: two rows of 6 x 2x2 5050,
+# two of 6 x 4x4 2020, edge to edge on V-cuts (no tabs, no nubs to sand
+# off). (6 x 6 is the most that fits 100 x 100 with the rails.) The cuts pass
+# 0.115mm from the edge pads (JLC's rule is 0.4mm copper to a V-cut), so the
+# score skims the pads' outer edge.
+preset: jlc-vcut
+layout: vcut
+max_size: [100, 100]
+legend:
+  A: sq15-5050x4-p7.5-micro-pvia
+  B: sq15-2020x16-p3.35-micro-pvia
+boards:
+  - A A A A A A
+  - A A A A A A
+  - B B B B B B
+  - B B B B B B
